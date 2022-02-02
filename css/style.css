@@ -1,0 +1,85 @@
+body {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  overflow: none;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
+.board {
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: 20px (80px)[8];
+      grid-template-columns: 20px repeat(8, 80px);
+  -ms-grid-rows: (80px)[8] 20px;
+      grid-template-rows: repeat(8, 80px) 20px;
+  grid-auto-flow: row;
+}
+
+.grid__square {
+  width: 80px;
+  height: 80px;
+  border: 1px solid darkgray;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
+.grid__square--black {
+  background-color: rgba(0, 0, 0, 0.333);
+}
+
+.grid__square--white {
+  background-color: rgba(255, 255, 255, 0.666);
+}
+
+.grid__square--name {
+  padding: auto;
+  text-align: center;
+  font-weight: 700;
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+.grid__square--nameCol {
+  text-transform: uppercase;
+}
+
+.grid__square--nameRow {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
+.piece {
+  width: 55px;
+  height: 55px;
+  border-radius: 55px;
+}
+
+.piece--black {
+  background-color: black;
+  border: 2px solid white;
+}
+
+.piece--white {
+  background-color: white;
+  border: 2px solid black;
+}
+/*# sourceMappingURL=style.css.map */

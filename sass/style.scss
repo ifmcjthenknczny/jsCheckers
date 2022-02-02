@@ -1,0 +1,68 @@
+$squareSize: 80px;
+$nameSquareSize: 20px;
+$blackColor: rgba(0, 0, 0, 0.333);
+$whiteColor: rgba(255, 255, 255, 0.666);
+$borderColor: darkgray;
+$pieceSize: 55px;
+
+body {
+    display: flex;
+    align-items: center;
+    overflow: none;
+    justify-content: center;
+}
+
+.board {
+    display: grid;
+    // grid: repeat(9, 80px) / repeat(9, 80px);
+    grid-template-columns: $nameSquareSize repeat(8,$squareSize);
+    grid-template-rows: repeat(8,$squareSize) $nameSquareSize;
+    grid-auto-flow: row;
+}
+
+.grid__square {
+    width: $squareSize;
+    height: $squareSize;
+    border: 1px solid $borderColor;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    // box-shadow:;
+    &--black {
+        background-color: $blackColor;
+    }
+    &--white {
+        background-color: $whiteColor;
+    }
+    &--name {
+        // border: 1px solid $borderColor;
+        padding: auto;
+        text-align: center;
+        font-weight: 700;
+        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+
+        &Col {
+            text-transform: uppercase;
+        }
+        &Row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+}
+
+.piece {
+    width: $pieceSize;
+    height: $pieceSize;
+    border-radius: $pieceSize;
+    &--black {
+        background-color: black;
+        border: 2px solid white;
+    }
+    &--white {
+        background-color: white;
+        border: 2px solid black;
+    }
+}
