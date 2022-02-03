@@ -1,15 +1,26 @@
-$squareSize: 80px;
+$squareSize: 90px;
 $nameSquareSize: 20px;
 $blackColor: rgba(0, 0, 0, 0.333);
 $whiteColor: rgba(255, 255, 255, 0.666);
+$clickedColor: rgba(255, 0, 0, 0.75);
 $borderColor: darkgray;
-$pieceSize: 55px;
+$pieceSize: $squareSize * (2 / 3);
 
 body {
     display: flex;
     align-items: center;
     overflow: none;
     justify-content: center;
+    flex-flow: column;
+}
+
+.button {
+    margin: 20px;
+    height: 50px;
+    width: 150px;
+    text-transform: capitalize;
+    // background-color: darkgray;
+    // color: white;
 }
 
 .board {
@@ -31,6 +42,9 @@ body {
     // box-shadow:;
     &--black {
         background-color: $blackColor;
+        // &Clicked {
+        //     color: mix($blackColor, $clickedColor);
+        // }
     }
     &--white {
         background-color: $whiteColor;
@@ -57,12 +71,24 @@ body {
     width: $pieceSize;
     height: $pieceSize;
     border-radius: $pieceSize;
+    border: 2.5px solid;
     &--black {
         background-color: black;
-        border: 2px solid white;
+        border-color: white;
     }
     &--white {
         background-color: white;
-        border: 2px solid black;
+        border-color: black;
     }
+    &--queenDecoration {
+        border-radius: $pieceSize;
+        width: $pieceSize / 2;
+        height: $pieceSize / 2;
+        background-color: gray;
+    }
+}
+
+#pieceClicked, .piece:hover {
+    background-color: $clickedColor;
+    transition: 0.3s;
 }

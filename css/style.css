@@ -9,21 +9,32 @@ body {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-flow: column;
+          flex-flow: column;
+}
+
+.button {
+  margin: 20px;
+  height: 50px;
+  width: 150px;
+  text-transform: capitalize;
 }
 
 .board {
   display: -ms-grid;
   display: grid;
-  -ms-grid-columns: 20px (80px)[8];
-      grid-template-columns: 20px repeat(8, 80px);
-  -ms-grid-rows: (80px)[8] 20px;
-      grid-template-rows: repeat(8, 80px) 20px;
+  -ms-grid-columns: 20px (90px)[8];
+      grid-template-columns: 20px repeat(8, 90px);
+  -ms-grid-rows: (90px)[8] 20px;
+      grid-template-rows: repeat(8, 90px) 20px;
   grid-auto-flow: row;
 }
 
 .grid__square {
-  width: 80px;
-  height: 80px;
+  width: 90px;
+  height: 90px;
   border: 1px solid darkgray;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -68,18 +79,32 @@ body {
 }
 
 .piece {
-  width: 55px;
-  height: 55px;
-  border-radius: 55px;
+  width: 60px;
+  height: 60px;
+  border-radius: 60px;
+  border: 2.5px solid;
 }
 
 .piece--black {
   background-color: black;
-  border: 2px solid white;
+  border-color: white;
 }
 
 .piece--white {
   background-color: white;
-  border: 2px solid black;
+  border-color: black;
+}
+
+.piece--queenDecoration {
+  border-radius: 60px;
+  width: 30px;
+  height: 30px;
+  background-color: gray;
+}
+
+#pieceClicked, .piece:hover {
+  background-color: rgba(255, 0, 0, 0.75);
+  -webkit-transition: 0.3s;
+  transition: 0.3s;
 }
 /*# sourceMappingURL=style.css.map */
