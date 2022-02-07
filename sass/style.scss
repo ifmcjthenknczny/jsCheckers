@@ -19,6 +19,7 @@ body {
     height: 50px;
     width: 150px;
     text-transform: capitalize;
+    // box-shadow: 0px 0px 123px -30px #000000;
     // background-color: darkgray;
     // color: white;
 }
@@ -26,8 +27,8 @@ body {
 .board {
     display: grid;
     // grid: repeat(9, 80px) / repeat(9, 80px);
-    grid-template-columns: $nameSquareSize repeat(8,$squareSize);
-    grid-template-rows: repeat(8,$squareSize) $nameSquareSize;
+    grid-template-columns: $nameSquareSize repeat(8, $squareSize);
+    grid-template-rows: repeat(8, $squareSize) $nameSquareSize;
     grid-auto-flow: row;
 }
 
@@ -39,6 +40,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+
     // box-shadow:;
     &--black {
         background-color: $blackColor;
@@ -46,9 +48,11 @@ body {
         //     color: mix($blackColor, $clickedColor);
         // }
     }
+
     &--white {
         background-color: $whiteColor;
     }
+
     &--name {
         // border: 1px solid $borderColor;
         padding: auto;
@@ -59,6 +63,7 @@ body {
         &Col {
             text-transform: uppercase;
         }
+
         &Row {
             display: flex;
             align-items: center;
@@ -72,14 +77,17 @@ body {
     height: $pieceSize;
     border-radius: $pieceSize;
     border: 2.5px solid;
+
     &--black {
         background-color: black;
         border-color: white;
     }
+
     &--white {
         background-color: white;
         border-color: black;
     }
+
     &--queenDecoration {
         border-radius: $pieceSize;
         width: $pieceSize / 2;
@@ -88,7 +96,16 @@ body {
     }
 }
 
-#pieceClicked, .piece:hover {
+#pieceClicked,
+.piece:hover {
     background-color: $clickedColor;
     transition: 0.3s;
+}
+
+.legalMove {
+    width: $squareSize / 3;
+    height: $squareSize / 3;
+    border-radius: $squareSize;
+    background-color: mix(aqua,violet);
+    border: 1px solid black;
 }

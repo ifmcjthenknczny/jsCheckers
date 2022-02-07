@@ -102,9 +102,18 @@ body {
   background-color: gray;
 }
 
-#pieceClicked, .piece:hover {
+#pieceClicked,
+.piece:hover {
   background-color: rgba(255, 0, 0, 0.75);
   -webkit-transition: 0.3s;
   transition: 0.3s;
+}
+
+.legalMove {
+  width: 30px;
+  height: 30px;
+  border-radius: 90px;
+  background-color: #77c1f7;
+  border: 1px solid black;
 }
 /*# sourceMappingURL=style.css.map */
