@@ -15,8 +15,22 @@ body {
           flex-flow: column;
 }
 
+.capturedPiecesTop,
+.capturedPiecesBottom {
+  height: 6px;
+  margin: 10px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-flow: row;
+          flex-flow: row;
+}
+
 .button {
-  margin: 20px;
+  margin-top: 5px;
+  margin-right: 30px;
   height: 50px;
   width: 150px;
   text-transform: capitalize;
@@ -95,11 +109,28 @@ body {
   border-color: black;
 }
 
-.piece--queenDecoration {
+.piece--queen {
   border-radius: 60px;
   width: 30px;
   height: 30px;
   background-color: gray;
+}
+
+.piece__mini {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: 1.5px solid;
+}
+
+.piece__mini--white {
+  border-color: black;
+  background-color: white;
+}
+
+.piece__mini--black {
+  border-color: white;
+  background-color: black;
 }
 
 #pieceClicked,
@@ -115,5 +146,26 @@ body {
   border-radius: 90px;
   background-color: #77c1f7;
   border: 1px solid black;
+}
+
+.gameInfo {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  text-transform: uppercase;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 20px;
+}
+
+.gameInfo__turnCounter {
+  margin-left: 450px;
+}
+
+.gameInfo__turnCounter span {
+  font-weight: 700;
+}
+
+.gameInfo__whoToMove span {
+  font-weight: 700;
 }
 /*# sourceMappingURL=style.css.map */
