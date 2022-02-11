@@ -2,12 +2,6 @@ function range(size, startAt = 0) {
     return [...Array(size).keys()].map(i => i + startAt);
 }
 
-function charRange(startChar, endChar) {
-    return String.fromCharCode(...range(endChar.charCodeAt(0) -
-        startChar.charCodeAt(0), startChar.charCodeAt(0))).split('')
-}
-
-// dać tam też inne rozmiary niż 8x8
 function generateBoard() {
     let whiteSquare = false;
     const grid = document.querySelector(".board");
@@ -17,7 +11,7 @@ function generateBoard() {
         squareWithName.classList.add('grid__square--nameRow', 'grid__square--name');
         squareWithName.innerText = rowName;
         grid.append(squareWithName);
-        for (let colName of charRange('a', 'i')) {
+        for (let colName of cols) {
             const square = document.createElement('div');
             const nameOfSquare = `${colName + rowName}`;
             square.classList.add('grid__square');
@@ -34,7 +28,7 @@ function generateBoard() {
         }
     }
     grid.append(document.createElement('div'));
-    for (let colName of charRange('a', 'i')) {
+    for (let colName of cols) {
         const squareWithName = document.createElement('div');
         squareWithName.classList.add('grid__square--nameCol', 'grid__square--name');
         squareWithName.innerText = colName;
@@ -84,29 +78,32 @@ function movePiece() {
     if (clickedPiece && this.firstElementChild.classList.contains('legalMove') && orderOfTurns()) {
 
         // console.log(forcedCapture);
-        console.log(`I am here. ${this}`);
+        // console.log(`I am here. ${this}`);
         if (forcedCapture) {
-            console.log(findSquareBetween(clickedPiece.parentElement.id, this.id));
+            // console.log(findSquareBetween(clickedPiece.parentElement.id, this.id));
             removeCapturedPiece(findSquareBetween(clickedPiece.parentElement.id, this.id));
         }
         this.appendChild(clickedPiece);
-        if (forcedCapture && isThereACapturePossibilty()) {
+        // if (forcedCapture && isThereACapturePossibilty()) {
+        if (forcedCapture && legalCapturesOfPiece(clickedPiece).length > 0) {
             removeLegalMovesMark();
             if (orderOfTurns()) {
                 if (isThereACapturePossibilty()) generateLegalMovesMark(legalCapturesOfPiece(clickedPiece));
                 else generateLegalMovesMark(legalNormalMovesOfPiece(clickedPiece));
-            movePiece();
+                movePiece();
+            }
         }
-    }
 
         lastMoveBlack = !lastMoveBlack;
         pieceUnhold();
+        const whoToMove = document.querySelector('.gameInfo__whoToMove span');
+        whoToMove.classList.toggle('white');
+
         if (lastMoveBlack) {
-            // turn++;
             document.querySelector('.gameInfo__turnCounter span').innerText = ++turn;
-            document.querySelector('.gameInfo__whoToMove span').innerText = 'White';
+            whoToMove.innerText = 'White';
         } else {
-            document.querySelector('.gameInfo__whoToMove span').innerText = 'Black';
+            whoToMove.innerText = 'Black';
         }
     }
 }
@@ -117,7 +114,7 @@ function removeCapturedPiece(square) {
     const pieceMini = document.createElement('div');
     lastMoveBlack ? pieceMini.classList.add('piece__mini--black') : pieceMini.classList.add('piece__mini--white');
     pieceMini.classList.add('piece__mini')
-    const graveyardName = lastMoveBlack ? '.capturedPiecesTop' : '.capturedPiecesBottom';
+    const graveyardName = !lastMoveBlack ? '.capturedPiecesTop' : '.capturedPiecesBottom';
     document.querySelector(graveyardName).appendChild(pieceMini);
 }
 
@@ -165,9 +162,6 @@ function isThereACapturePossibilty() {
 }
 
 function legalCapturesOfPiece(piece) {
-    const cols = 'abcdefgh'.split('');
-    const rows = range(8, 1);
-
     const pieceSquare = piece.parentElement.id;
     const pieceCol = pieceSquare.split('')[0];
     const pieceRow = parseInt(pieceSquare.split('')[1]);
@@ -194,15 +188,12 @@ function legalCapturesOfPiece(piece) {
         const targetSquare = document.querySelector(`#${captureCandidate}`);
         if (!targetSquare.firstElementChild && isThereAPieceToCapture(pieceSquare, captureCandidate)) capturesPossible.push(targetSquare);
     }
+    if (!isPieceWhite) rows.reverse();
 
-    return capturesPossible;
+    return capturesPossible
 }
 
-
 function legalNormalMovesOfPiece(piece) {
-    const cols = 'abcdefgh'.split('');
-    const rows = range(8, 1);
-
     const pieceSquare = piece.parentElement.id;
     const pieceCol = pieceSquare.split('')[0];
     const pieceRow = parseInt(pieceSquare.split('')[1]);
@@ -226,6 +217,8 @@ function legalNormalMovesOfPiece(piece) {
         if (!targetSquare.firstElementChild) normalMovesPossible.push(targetSquare);
     }
 
+    if (!isPieceWhite) rows.reverse();
+
     return normalMovesPossible
 }
 
@@ -238,8 +231,6 @@ function isThereAPieceToCapture(originalSquare, targetSquare) {
 }
 
 function findSquareBetween(originalSquare, targetSquare) {
-    const cols = 'abcdefgh'.split('');
-    const rows = '12345678'.split('');
     const [originalCol, originalRow] = originalSquare;
     const [targetCol, targetRow] = targetSquare;
 
@@ -260,37 +251,48 @@ function startGame() {
     buttonsInit();
 }
 
+const cols = 'abcdefgh'.split('');
+const rows = range(8, 1);
 let turn = 1;
 let forcedCapture = false;
 let lastMoveBlack = true;
 let playWhite = true;
 startGame();
+// let clickedPiece;
 
-
-// TO DO wygląd
+// TO DO CSS HTML
 //html description
-//readme
-//fajny font
+//nazwy trochę bardziej BEM
+//fajny font przyciski
 //smooth transition moves
-//box shadow
+//box shadow dla pól szachownicy
 //tekstura drewna
-//responsywne
+//responsywne dla mobiki
 //wygląd damki - pseudodiv w środku
-//wygląd bierek
-//ładny licznik zbitych pionów ********
+//wygląd bierek - dać w środku okrąg
+//obsługa text-stroke żeby się zabezpieczyć
 
-// TO DO logika
-//licznik zbić
-//bicia combo jako legalny ruch
+// TO DO LOGIKA JS
+//promocja i ruchy damki
+//warunki zwycięstwa/porażki zaimplementować wraz z fanfarami
+//random ai
 
 //naprawić eroory
 //alert o biciu
 
-//promocja i ruchy damki
-//random ai
 //obracanie szachownicy
 //wybór koloru pionków
-//warunki zwycięstwa/porażki
+
+//dać też inne rozmiary niż 8x8
 //unhold na body
-//za dużo zmiennej z klikniętą bierką
-//turn counter
+
+// PRZEJRZYSTOŚĆ KODU
+//za dużo zmiennej z klikniętą bierką - wyłączyć ją i tylko zmieniać jej zawartość
+//w ogóle elementy querySelector na zewnątz funkcji
+//rozdzielić generateboard na mniejsze funkcje
+//opisac funkcje
+//dodac typy zmiennych
+//mniejsze funkcje wszędzie generalnie
+//piece unhold na mniejsze funkcje
+//forcedcapture - po co to
+//readme github
