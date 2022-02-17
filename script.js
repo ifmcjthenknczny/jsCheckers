@@ -1,9 +1,29 @@
+// class Piece {
+//     constructor(color) {
+//         this.color = color;
+//         this.queen = false;
+//     }
+//     hold() {
+//         pieceUnhold();
+//         this.setAttribute('id', 'pieceClicked');
+
+//         if (orderOfTurns()) {
+//             if (isThereACapturePossibilty()) generateLegalMovesMark(legalCapturesOfPiece(this));
+//             else generateLegalMovesMark(legalNormalMovesOfPiece(this));
+//         }
+//     }
+// }
+
 function range(size, startAt = 0) {
     return [...Array(size).keys()].map(i => i + startAt);
 }
 
 function generateBoard() {
     let whiteSquare = false;
+    const main = document.createElement('main');
+    const board = document.createElement('section');
+    board.className = 'board';
+    document.body.appendChild(main);
     const grid = document.querySelector(".board");
     for (let rowName of range(8, 1).reverse()) {
         whiteSquare = !whiteSquare;
@@ -68,23 +88,14 @@ function removeLegalMovesMark() {
         for (element of document.querySelectorAll('.legalMove')) element.remove();
 }
 
-function nodeListContains(nodelist, obj) {
-    if (-1 < Array.from(nodelist).indexOf(obj)) return true;
-    return false;
-}
-
 function movePiece() {
     const clickedPiece = document.querySelector('#pieceClicked');
     if (clickedPiece && this.firstElementChild.classList.contains('legalMove') && orderOfTurns()) {
 
-        // console.log(forcedCapture);
-        // console.log(`I am here. ${this}`);
         if (forcedCapture) {
-            // console.log(findSquareBetween(clickedPiece.parentElement.id, this.id));
             removeCapturedPiece(findSquareBetween(clickedPiece.parentElement.id, this.id));
         }
         this.appendChild(clickedPiece);
-        // if (forcedCapture && isThereACapturePossibilty()) {
         if (forcedCapture && legalCapturesOfPiece(clickedPiece).length > 0) {
             removeLegalMovesMark();
             if (orderOfTurns()) {
@@ -93,18 +104,44 @@ function movePiece() {
                 movePiece();
             }
         }
-
+        checkIfPromotion(); //tutaj dodać damkę
         lastMoveBlack = !lastMoveBlack;
         pieceUnhold();
-        const whoToMove = document.querySelector('.gameInfo__whoToMove span');
-        whoToMove.classList.toggle('white');
 
-        if (lastMoveBlack) {
-            document.querySelector('.gameInfo__turnCounter span').innerText = ++turn;
-            whoToMove.innerText = 'White';
+        if (endOfGameCheck()) {
+            congratsToWinner();
+            removeAllEventListeners();
         } else {
-            whoToMove.innerText = 'Black';
+            changeGameInfo();
         }
+    }
+}
+
+function congratsToWinner() {
+    const whoToMove = document.querySelector(".gameInfo__whoToMove");
+    if (lastMoveBlack) {
+        whoToMove.innerHTML = '<span>Black</span> won!'
+    } else {
+        whoToMove.innerHTML = '<span class="white">White</span> won!'
+    }
+}
+
+function removeAllEventListeners() {
+    for (piece of document.querySelector('.piece')) {
+        const newPiece = piece.cloneNode(true);
+        piece.parentNode.replaceChild(newPiece, piece);
+    }
+}
+
+function changeGameInfo() {
+    const whoToMove = document.querySelector('.gameInfo__whoToMove span');
+    whoToMove.classList.toggle('white');
+
+    if (lastMoveBlack) {
+        document.querySelector('.gameInfo__turnCounter span').innerText = ++turn;
+        whoToMove.innerText = 'White';
+    } else {
+        whoToMove.innerText = 'Black';
     }
 }
 
@@ -118,26 +155,55 @@ function removeCapturedPiece(square) {
     document.querySelector(graveyardName).appendChild(pieceMini);
 }
 
-function buttonsInit() {
-    const resetButton = document.querySelector(".button--reset");
-    resetButton.addEventListener("click", function () {
-        const board = document.querySelector(".board");
-        board.innerHTML = '';
-        lastMoveBlack = true;
-        generateBoard();
-        generateStartPosition();
-    });
-    const invertButton = document.querySelector(".button--invert");
-    invertButton.addEventListener("click", function () {
-        playWhite ? this.textContent = "Play White" : this.textContent = "Play Black";
-        playWhite = !playWhite;
-    });
+function checkIfPromotion() {
+    const clickedPiece = document.querySelector('#pieceClicked');
+    const [, clickedPieceRow] = clickedPiece.parentElement.id;
+    if ((lastMoveBlack && clickedPieceRow === '8') || (!lastMoveBlack && clickedPieceRow === '1')) return true
+    return false
 }
 
-function endOfGame() {
-    const stillWhitePieces = document.querySelectorAll('piece--white');
-    const stillBlackPieces = document.querySelectorAll('piece--black');
+function resetGame() {
+    const allPieces = document.querySelectorAll('.piece');
+    for (piece of allPieces) piece.remove();
+    lastMoveBlack = true;
+    turn = 1;
+    generateStartPosition();
+    document.querySelector('.gameInfo').remove();
+    generateGameInfo();
+    for (graveyard of document.querySelectorAll('.capturedPieces')) graveyard.innerHTML = '';
+}
 
+function buttonsInit() {
+    const resetButton = document.querySelector(".button--reset");
+    resetButton.addEventListener("click", resetGame);
+    const invertButton = document.querySelector(".button--invert");
+    invertButton.addEventListener("click", invertBoard);
+}
+
+function invertBoard() {
+    playWhite ? this.textContent = "Play White" : this.textContent = "Play Black";
+    playWhite = !playWhite;
+}
+
+function endOfGameCheck() {
+    const selector = lastMoveBlack ? ".piece--white" : ".piece--black";
+    const stillPieces = (document.querySelectorAll(selector)).length;
+    if (stillPieces === 0) return true;
+    if (!checkIfThereArePossibleMoves()) return true;
+    return false
+}
+
+function checkIfThereArePossibleMoves() {
+    const selector = lastMoveBlack ? ".piece--white" : ".piece--black";
+    const allColorPieces = [];
+    for (piece of document.querySelectorAll(selector)) allColorPieces.push(piece);
+    const legalNormalMoves = allColorPieces.map(p => legalNormalMovesOfPiece(p).length);
+    const legalCaptures = allColorPieces.map(p => legalCapturesOfPiece(p).length);
+    const legalMoves = legalNormalMoves.concat(legalCaptures);
+    const sumOfLegalMoves = legalMoves.reduce((total, curr) => total + curr);
+    console.log(`Legal moves: ${sumOfLegalMoves}`);
+    if (sumOfLegalMoves === 0) return false
+    return true
 }
 
 function orderOfTurns() {
@@ -245,10 +311,26 @@ function generateLegalMovesMark(legalMovesList) {
     }
 }
 
+function generateGameInfo() {
+    const gameInfo = document.createElement('section');
+    gameInfo.className = 'gameInfo';
+    const whoToMove = document.createElement('section');
+    whoToMove.className = 'gameInfo__whoToMove';
+    const turnCounter = document.createElement('section');
+    turnCounter.className = 'gameInfo__turnCounter';
+
+    whoToMove.innerHTML = '<span class="white">White</span> to move';
+    turnCounter.innerHTML = 'Turn: <span>1</span>';
+    gameInfo.appendChild(whoToMove);
+    gameInfo.appendChild(turnCounter);
+    document.body.prepend(gameInfo);
+}
+
 function startGame() {
     generateBoard();
     generateStartPosition();
     buttonsInit();
+    generateGameInfo();
 }
 
 const cols = 'abcdefgh'.split('');
@@ -257,8 +339,8 @@ let turn = 1;
 let forcedCapture = false;
 let lastMoveBlack = true;
 let playWhite = true;
-startGame();
 // let clickedPiece;
+startGame();
 
 // TO DO CSS HTML
 //html description
@@ -273,18 +355,22 @@ startGame();
 //obsługa text-stroke żeby się zabezpieczyć
 
 // TO DO LOGIKA JS
-//promocja i ruchy damki
-//warunki zwycięstwa/porażki zaimplementować wraz z fanfarami
+//promocja i ruchy damki:
+//funkcja sprawdzająca czy na przekątnej można bić, dodać funkcję sprawdzającą ruchy dla damki
+//dodać sprawdzanie warunków końca gry, fanfary i jumbotron żeby wjechał + czy wszystko z tym pasuje
 //random ai
+//generate graveyard?
 
-//naprawić eroory
+//naprawić eroory w konsoli
 //alert o biciu
 
 //obracanie szachownicy
-//wybór koloru pionków
+//wybór koloru pionków w dowolnym momencie
 
 //dać też inne rozmiary niż 8x8
 //unhold na body
+
+//warunki remisu, no i podział końca gry na wygrana/porażka/remis
 
 // PRZEJRZYSTOŚĆ KODU
 //za dużo zmiennej z klikniętą bierką - wyłączyć ją i tylko zmieniać jej zawartość
@@ -296,3 +382,5 @@ startGame();
 //piece unhold na mniejsze funkcje
 //forcedcapture - po co to
 //readme github
+
+//generateboard naprawić, żeby najpierw wszystko stworzyło, potem dało do DOMa
