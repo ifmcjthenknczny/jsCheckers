@@ -34,46 +34,64 @@ body {
 .button {
   -webkit-transition: 0.5s;
   transition: 0.5s;
-  font-size: 18px;
+  font-size: 20px;
   height: 50px;
   width: 150px;
   background-color: lightgrey;
+  text-transform: uppercase;
+  font-weight: 550;
 }
 
 .button--reset {
   margin-top: 5px;
-  margin-right: 30px;
-  text-transform: capitalize;
   border-radius: 12px;
   border: .8px solid black;
+  font-weight: 650;
 }
 
 .button--reset:hover {
   background-color: rgba(255, 0, 0, 0.75);
   color: white;
+  font-weight: 900;
 }
 
 .button--color {
-  text-transform: uppercase;
   border: 2px solid black;
-  font-weight: 400;
-  margin-top: 100px;
+  font-size: 28px;
+  width: 200px;
+  height: 75px;
+  margin-top: 60px;
 }
 
 .button--white:hover {
   background-color: white;
-  font-weight: 700;
+  font-weight: 900;
 }
 
 .button--black:hover {
   background-color: black;
-  font-weight: 700;
+  font-weight: 900;
   color: white;
 }
 
 .question {
+  margin-top: 300px;
   text-transform: uppercase;
-  font-weight: 550;
+  font-weight: 650;
+  font-size: 50px;
+}
+
+.buttonContainer {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-flow: row;
+          flex-flow: row;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
 }
 
 .board {
@@ -137,11 +155,6 @@ body {
   height: 60px;
   border-radius: 60px;
   border: 2.5px solid;
-}
-
-.piece--black {
-  background-color: black;
-  border-color: white;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -151,6 +164,11 @@ body {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
+}
+
+.piece--black {
+  background-color: black;
+  border-color: white;
 }
 
 .piece--black .piece--queenDecoration {
@@ -160,15 +178,6 @@ body {
 .piece--white {
   background-color: white;
   border-color: black;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
 }
 
 .piece--white .piece--queenDecoration {
@@ -179,7 +188,7 @@ body {
   border-radius: 60px;
   width: 30px;
   height: 30px;
-  background-color: gray;
+  background-color: darkgray;
   border: 1.5px solid;
 }
 
@@ -188,6 +197,15 @@ body {
   height: 6px;
   border-radius: 50%;
   border: 1.5px solid;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
 }
 
 .piece__mini--white {
@@ -198,6 +216,13 @@ body {
 .piece__mini--black {
   border-color: white;
   background-color: black;
+}
+
+.piece__mini--queen {
+  border-radius: 50%;
+  background-color: darkgrey;
+  width: 3px;
+  height: 3px;
 }
 
 .piece:hover .piece--queenDecoration,

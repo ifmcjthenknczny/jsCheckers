@@ -34,51 +34,59 @@ body {
 
 .button {
     transition: 0.5s;
-    font-size: 18px;
+    font-size: 20px;
     height: 50px;
     width: 150px;
     background-color: lightgrey;
-
+    text-transform: uppercase;
+    font-weight: 550;
 
     &--reset {
         margin-top: 5px;
-        margin-right: 30px;
-        text-transform: capitalize;
         border-radius: 12px;
         border: .8px solid black;
+        font-weight: 650;
 
-        // 
-        // background-color: darkgray;
-        // color: white;
         &:hover {
             background-color: $clickedColor;
             color: white;
+            font-weight: 900;
         }
     }
 
     &--color {
-        text-transform: uppercase;
         border: 2px solid black;
-        font-weight: 400;
-        margin-top: 100px;
+        font-size: 28px;
+        width: 200px;
+        height: 75px;
+        margin-top: 60px;
     }
 
     &--white:hover {
         background-color: white;
-        font-weight: 700;
+        font-weight: 900;
     }
 
     &--black:hover {
         background-color: black;
-        font-weight: 700;
+        font-weight: 900;
         color: white;
     }
 }
 
 .question {
+    // justify-self: center;
+    margin-top: 300px;
     text-transform: uppercase;
-    font-weight: 550;
+    font-weight: 650;
+    font-size: 50px;
+}
 
+.buttonContainer {
+    display: flex;
+    flex-flow: row;
+    // align-content: center;
+    justify-content: space-between;
 }
 
 .board {
@@ -131,13 +139,13 @@ body {
     height: $pieceSize;
     border-radius: $pieceSize;
     border: 2.5px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &--black {
         background-color: black;
         border-color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
 
         & .piece--queenDecoration {
             border-color: white;
@@ -147,9 +155,6 @@ body {
     &--white {
         background-color: white;
         border-color: black;
-        display: flex;
-        align-items: center;
-        justify-content: center;
 
         & .piece--queenDecoration {
             border-color: black;
@@ -160,7 +165,7 @@ body {
         border-radius: $pieceSize;
         width: $pieceSize / 2;
         height: $pieceSize / 2;
-        background-color: gray;
+        background-color: darkgray;
         border: 1.5px solid;
     }
 }
@@ -170,6 +175,9 @@ body {
     height: $minipieceSize;
     border-radius: 50%;
     border: 1.5px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &--white {
         border-color: black;
@@ -179,6 +187,13 @@ body {
     &--black {
         border-color: white;
         background-color: black;
+    }
+    &--queen {
+        border-radius: 50%;
+        background-color: darkgrey;
+        width: $minipieceSize/2;
+        height: $minipieceSize/2;
+        // border: .8px solid grey;
     }
 }
 

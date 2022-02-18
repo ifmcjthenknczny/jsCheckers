@@ -1,31 +1,17 @@
-// class Piece {
-//     constructor(color) {
-//         this.color = color;
-//         this.queen = false;
-//     }
-//     hold() {
-//         pieceUnhold();
-//         this.setAttribute('id', 'pieceClicked');
-
-//         if (orderOfTurns()) {
-//             if (isThereACapturePossibilty()) generateLegalMovesMark(legalCapturesOfPiece(this));
-//             else generateLegalMovesMark(legalNormalMovesOfPiece(this));
-//         }
-//     }
-// }
-
 function range(size, startAt = 0) {
     return [...Array(size).keys()].map(i => i + startAt);
 }
 
 function generateBoard() {
     let whiteSquare = false;
-    const main = document.createElement('main');
-    const board = document.createElement('section');
-    board.className = 'board';
-    document.body.appendChild(main);
-    const grid = document.querySelector(".board");
-    for (let rowName of range(8, 1).reverse()) {
+    const main = document.querySelector('main');
+    const grid = document.createElement('section');
+    grid.classList.add('board');
+    // const grid = document.querySelector(".board");
+    playWhite ? rows.reverse() : rows;
+    playWhite ? cols : cols.reverse();
+
+    for (let rowName of rows) {
         whiteSquare = !whiteSquare;
         const squareWithName = document.createElement('div');
         squareWithName.classList.add('grid__square--nameRow', 'grid__square--name');
@@ -54,15 +40,21 @@ function generateBoard() {
         squareWithName.innerText = colName;
         grid.append(squareWithName);
     }
+    main.appendChild(grid);
+    document.body.appendChild(main);
+    playWhite ? rows.reverse() : rows;
+    playWhite ? cols : cols.reverse();
 }
 
 function generateStartPosition() {
     const blackSquares = document.querySelectorAll(".grid__square--black");
+    const order = ['piece--black', 'piece--white'];
+    if (!playWhite) order.reverse();
     for (let i = 0; i < blackSquares.length; i++) {
         const piece = document.createElement('div');
         piece.classList.add('piece');
-        if (i < 3 * 4) piece.classList.add('piece--black');
-        else if (i >= 5 * 4) piece.classList.add('piece--white');
+        if (i < 3 * 4) piece.classList.add(order[0]);
+        else if (i >= 5 * 4) piece.classList.add(order[1]);
         piece.addEventListener('click', pieceHold);
         if (i < 3 * 4 || i >= 5 * 4) blackSquares[i].append(piece);
     }
@@ -116,7 +108,7 @@ function movePiece() {
 
         if (endOfGame()) {
             congratsToWinner();
-            blockBoard();
+            disableMoves();
         } else {
             changeGameInfo();
         }
@@ -132,7 +124,7 @@ function congratsToWinner() {
     }
 }
 
-function blockBoard() {
+function disableMoves() {
     for (let piece of document.querySelector('.piece')) {
         const newPiece = piece.cloneNode(true);
         piece.parentNode.replaceChild(newPiece, piece);
@@ -152,11 +144,17 @@ function changeGameInfo() {
 }
 
 function removeCapturedPiece(square) {
+    const isQueen = (square.firstChild.firstChild !== null);
     square.firstChild.remove();
 
     const pieceMini = document.createElement('div');
     lastMoveBlack ? pieceMini.classList.add('piece__mini--black') : pieceMini.classList.add('piece__mini--white');
     pieceMini.classList.add('piece__mini')
+    if (isQueen) {
+        const queenDecoration = document.createElement('div');
+        queenDecoration.classList.add('piece__mini--queen');
+        pieceMini.appendChild(queenDecoration);
+    }
     const graveyardName = !lastMoveBlack ? '.capturedPieces--top' : '.capturedPieces--bottom';
     document.querySelector(graveyardName).appendChild(pieceMini);
 }
@@ -169,23 +167,28 @@ function promotion(piece) {
     return false
 }
 
-function resetGame() {
-    removeLegalMovesMark();
-    const allPieces = document.querySelectorAll('.piece');
-    for (let piece of allPieces) piece.remove();
-    lastMoveBlack = true;
-    turn = 1;
-    generateStartPosition();
-    document.querySelector('.gameInfo').remove();
-    generateGameInfo();
-    for (let graveyard of document.querySelectorAll('.capturedPieces')) graveyard.innerHTML = '';
-}
+// function resetGame() {
+//     removeLegalMovesMark();
+//     const allPieces = document.querySelectorAll('.piece');
+//     for (let piece of allPieces) piece.remove();
+//     lastMoveBlack = true;
+//     turn = 1;
+//     generateStartPosition();
+//     document.querySelector('.gameInfo').remove();
+//     generateGameInfo();
+//     for (let graveyard of document.querySelectorAll('.capturedPieces')) graveyard.innerHTML = '';
+// }
 
 function generateButtons() {
     const resetButton = document.createElement('button');
     resetButton.classList.add('button', 'button--reset');
-    resetButton.innerText = 'reset board';
-    resetButton.addEventListener("click", resetGame);
+    resetButton.innerText = 'restart';
+    resetButton.addEventListener("click", () => {
+        document.body.innerHTML = '';
+        lastMoveBlack = true;
+        turn = 1;
+        generateFirstChoice()
+    });
     document.body.appendChild(resetButton);
 }
 
@@ -341,11 +344,12 @@ function generateGameInfo() {
 }
 
 function generateFirstChoice() {
-    const main = document.querySelector('main');
+    const main = document.createElement('main');
     const question = document.createElement('section');
     question.classList.add("question");
     question.innerText = 'choose your color';
     const buttons = document.createElement('section');
+    buttons.classList.add('buttonContainer');
     const buttonWhite = document.createElement('button');
     buttonWhite.classList.add('button--white', 'button', 'button--color');
     buttonWhite.innerText = 'white';
@@ -366,6 +370,7 @@ function generateFirstChoice() {
     buttons.appendChild(buttonWhite);
     buttons.appendChild(buttonBlack);
     main.appendChild(buttons);
+    document.body.appendChild(main);
 }
 
 function startGame() {
@@ -382,9 +387,9 @@ let turn = 1;
 let forcedCapture = false;
 let lastMoveBlack = true;
 let playWhite = true;
+// let vsComputer = false;
 // let clickedPiece;
-startGame();
-// generateFirstChoice();
+generateFirstChoice();
 
 // TO DO CSS HTML
 //html description
@@ -393,18 +398,17 @@ startGame();
 //smooth transition moves
 //box shadow dla pól szachownicy
 //tekstura drewna
-//responsywne dla mobiki
+//responsywne dla mobili
 //wygląd bierek - dać w środku okrąg
 //obsługa text-stroke żeby się zabezpieczyć
 //mała damka
 //wyśrodkować gameinfo
+//dopieścić okno wyboru na początku
 
 // TO DO LOGIKA JS
-//ekran wybór koloru pionków na początku
-//generowanie szachownicy i pozycji startowej z przyjęciem argumentu wyboru
-//random ai
 //ruchy damki: funkcja sprawdzająca czy na przekątnej można bić, dodać funkcję sprawdzającą ruchy dla damki
-//obracanie szachownicy
+//2 players vs random ai (po damce) + okno wyboru + obracanie szachownicy po każdym ruchu
+//cofanie ruchów
 
 //naprawić eroory w konsoli
 //alert o biciu
@@ -426,3 +430,4 @@ startGame();
 //readme github
 //funkcje po kolei umiejscowic w kodzie
 //zamiast clicked piece == this?
+//wrzucić na hosting
