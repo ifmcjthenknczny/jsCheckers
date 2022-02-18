@@ -85,7 +85,7 @@ function pieceUnhold() {
 
 function removeLegalMovesMark() {
     if (document.querySelectorAll('.legalMove'))
-        for (element of document.querySelectorAll('.legalMove')) element.remove();
+        for (let element of document.querySelectorAll('.legalMove')) element.remove();
 }
 
 function movePiece() {
@@ -104,13 +104,19 @@ function movePiece() {
                 movePiece();
             }
         }
-        checkIfPromotion(); //tutaj dodać damkę
+        if (promotion(clickedPiece)) {
+            clickedPiece.classList.add("piece--queen");
+            const queenDecoration = document.createElement('div');
+            queenDecoration.classList.add("piece--queenDecoration");
+            clickedPiece.appendChild(queenDecoration);
+            // removeLegalMovesMark();
+        }
         lastMoveBlack = !lastMoveBlack;
         pieceUnhold();
 
-        if (endOfGameCheck()) {
+        if (endOfGame()) {
             congratsToWinner();
-            removeAllEventListeners();
+            blockBoard();
         } else {
             changeGameInfo();
         }
@@ -126,8 +132,8 @@ function congratsToWinner() {
     }
 }
 
-function removeAllEventListeners() {
-    for (piece of document.querySelector('.piece')) {
+function blockBoard() {
+    for (let piece of document.querySelector('.piece')) {
         const newPiece = piece.cloneNode(true);
         piece.parentNode.replaceChild(newPiece, piece);
     }
@@ -151,41 +157,39 @@ function removeCapturedPiece(square) {
     const pieceMini = document.createElement('div');
     lastMoveBlack ? pieceMini.classList.add('piece__mini--black') : pieceMini.classList.add('piece__mini--white');
     pieceMini.classList.add('piece__mini')
-    const graveyardName = !lastMoveBlack ? '.capturedPiecesTop' : '.capturedPiecesBottom';
+    const graveyardName = !lastMoveBlack ? '.capturedPieces--top' : '.capturedPieces--bottom';
     document.querySelector(graveyardName).appendChild(pieceMini);
 }
 
-function checkIfPromotion() {
-    const clickedPiece = document.querySelector('#pieceClicked');
-    const [, clickedPieceRow] = clickedPiece.parentElement.id;
-    if ((lastMoveBlack && clickedPieceRow === '8') || (!lastMoveBlack && clickedPieceRow === '1')) return true
+function promotion(piece) {
+    const [, clickedPieceRow] = piece.parentElement.id;
+    if ((lastMoveBlack && clickedPieceRow === '8') || (!lastMoveBlack && clickedPieceRow === '1')) {
+        return true
+    }
     return false
 }
 
 function resetGame() {
+    removeLegalMovesMark();
     const allPieces = document.querySelectorAll('.piece');
-    for (piece of allPieces) piece.remove();
+    for (let piece of allPieces) piece.remove();
     lastMoveBlack = true;
     turn = 1;
     generateStartPosition();
     document.querySelector('.gameInfo').remove();
     generateGameInfo();
-    for (graveyard of document.querySelectorAll('.capturedPieces')) graveyard.innerHTML = '';
+    for (let graveyard of document.querySelectorAll('.capturedPieces')) graveyard.innerHTML = '';
 }
 
-function buttonsInit() {
-    const resetButton = document.querySelector(".button--reset");
+function generateButtons() {
+    const resetButton = document.createElement('button');
+    resetButton.classList.add('button', 'button--reset');
+    resetButton.innerText = 'reset board';
     resetButton.addEventListener("click", resetGame);
-    const invertButton = document.querySelector(".button--invert");
-    invertButton.addEventListener("click", invertBoard);
+    document.body.appendChild(resetButton);
 }
 
-function invertBoard() {
-    playWhite ? this.textContent = "Play White" : this.textContent = "Play Black";
-    playWhite = !playWhite;
-}
-
-function endOfGameCheck() {
+function endOfGame() {
     const selector = lastMoveBlack ? ".piece--white" : ".piece--black";
     const stillPieces = (document.querySelectorAll(selector)).length;
     if (stillPieces === 0) return true;
@@ -196,12 +200,11 @@ function endOfGameCheck() {
 function checkIfThereArePossibleMoves() {
     const selector = lastMoveBlack ? ".piece--white" : ".piece--black";
     const allColorPieces = [];
-    for (piece of document.querySelectorAll(selector)) allColorPieces.push(piece);
+    for (let piece of document.querySelectorAll(selector)) allColorPieces.push(piece);
     const legalNormalMoves = allColorPieces.map(p => legalNormalMovesOfPiece(p).length);
     const legalCaptures = allColorPieces.map(p => legalCapturesOfPiece(p).length);
     const legalMoves = legalNormalMoves.concat(legalCaptures);
     const sumOfLegalMoves = legalMoves.reduce((total, curr) => total + curr);
-    console.log(`Legal moves: ${sumOfLegalMoves}`);
     if (sumOfLegalMoves === 0) return false
     return true
 }
@@ -240,11 +243,11 @@ function legalCapturesOfPiece(piece) {
     if (!isPieceWhite) rows.reverse();
 
     // captures
-    if (pieceCol !== 'g' && pieceCol !== 'h') {
+    if (pieceCol !== cols[cols.length - 2] && pieceCol !== cols[cols.length - 1]) {
         if (pieceRow !== rows[rows.length - 2] && pieceRow !== rows[rows.length - 1]) captureCandidates.push(`${cols[cols.indexOf(pieceCol)+2]}${pieceRow+2*colorCoeff}`);
         if (pieceRow !== rows[0] && pieceRow !== rows[1]) captureCandidates.push(`${cols[cols.indexOf(pieceCol)+2]}${pieceRow-2*colorCoeff}`);
     }
-    if (pieceCol !== 'a' && pieceCol !== 'b') {
+    if (pieceCol !== cols[0] && pieceCol !== cols[1]) {
         if (pieceRow !== rows[rows.length - 2] && pieceRow !== rows[rows.length - 1]) captureCandidates.push(`${cols[cols.indexOf(pieceCol)-2]}${pieceRow+2*colorCoeff}`);
         if (pieceRow !== rows[0] && pieceRow !== rows[1]) captureCandidates.push(`${cols[cols.indexOf(pieceCol)-2]}${pieceRow-2*colorCoeff}`);
     }
@@ -273,8 +276,8 @@ function legalNormalMovesOfPiece(piece) {
 
     // normal move - if not last row
     if (pieceRow !== rows[rows.length - 1]) {
-        if (pieceCol !== 'a') normalMoveCandidates.push(`${cols[cols.indexOf(pieceCol)-1]}${pieceRow+colorCoeff}`);
-        if (pieceCol !== 'h') normalMoveCandidates.push(`${cols[cols.indexOf(pieceCol)+1]}${pieceRow+colorCoeff}`);
+        if (pieceCol !== cols[0]) normalMoveCandidates.push(`${cols[cols.indexOf(pieceCol)-1]}${pieceRow+colorCoeff}`);
+        if (pieceCol !== cols[cols.length - 1]) normalMoveCandidates.push(`${cols[cols.indexOf(pieceCol)+1]}${pieceRow+colorCoeff}`);
     }
 
     //check if square is occupied by another piece
@@ -283,7 +286,7 @@ function legalNormalMovesOfPiece(piece) {
         if (!targetSquare.firstElementChild) normalMovesPossible.push(targetSquare);
     }
 
-    if (!isPieceWhite) rows.reverse();
+    if (!isPieceWhite) rows.reverse(); //wraca do zwykłej, nieodwróconej kolejności rzędów
 
     return normalMovesPossible
 }
@@ -304,11 +307,22 @@ function findSquareBetween(originalSquare, targetSquare) {
 }
 
 function generateLegalMovesMark(legalMovesList) {
-    for (legalMoveSquare of legalMovesList) {
+    for (let legalMoveSquare of legalMovesList) {
         const legalMoveMark = document.createElement('div');
         legalMoveMark.classList.add('legalMove');
         legalMoveSquare.appendChild(legalMoveMark);
     }
+}
+
+function generateGraveyards() {
+    const graveyardTop = document.createElement('section');
+    const graveyardBottom = document.createElement('section');
+    for (graveyard of [graveyardTop, graveyardBottom]) graveyard.classList.add('capturedPieces');
+    graveyardTop.classList.add('capturedPieces--top');
+    graveyardBottom.classList.add('capturedPieces--bottom');
+    const main = document.querySelector('main');
+    document.body.insertBefore(graveyardTop, main);
+    document.body.insertBefore(graveyardBottom, main.nextSibling);
 }
 
 function generateGameInfo() {
@@ -326,10 +340,39 @@ function generateGameInfo() {
     document.body.prepend(gameInfo);
 }
 
+function generateFirstChoice() {
+    const main = document.querySelector('main');
+    const question = document.createElement('section');
+    question.classList.add("question");
+    question.innerText = 'choose your color';
+    const buttons = document.createElement('section');
+    const buttonWhite = document.createElement('button');
+    buttonWhite.classList.add('button--white', 'button', 'button--color');
+    buttonWhite.innerText = 'white';
+    const buttonBlack = document.createElement('button');
+    buttonBlack.classList.add('button--black', 'button', 'button--color');
+    buttonBlack.innerText = 'black';
+    buttonWhite.addEventListener('click', () => {
+        playWhite = true;
+        main.innerHTML = '';
+        startGame();
+    })
+    buttonBlack.addEventListener('click', () => {
+        playWhite = false;
+        main.innerHTML = '';
+        startGame();
+    })
+    main.appendChild(question);
+    buttons.appendChild(buttonWhite);
+    buttons.appendChild(buttonBlack);
+    main.appendChild(buttons);
+}
+
 function startGame() {
     generateBoard();
     generateStartPosition();
-    buttonsInit();
+    generateGraveyards();
+    generateButtons();
     generateGameInfo();
 }
 
@@ -341,6 +384,7 @@ let lastMoveBlack = true;
 let playWhite = true;
 // let clickedPiece;
 startGame();
+// generateFirstChoice();
 
 // TO DO CSS HTML
 //html description
@@ -350,37 +394,35 @@ startGame();
 //box shadow dla pól szachownicy
 //tekstura drewna
 //responsywne dla mobiki
-//wygląd damki - pseudodiv w środku
 //wygląd bierek - dać w środku okrąg
 //obsługa text-stroke żeby się zabezpieczyć
+//mała damka
+//wyśrodkować gameinfo
 
 // TO DO LOGIKA JS
-//promocja i ruchy damki:
-//funkcja sprawdzająca czy na przekątnej można bić, dodać funkcję sprawdzającą ruchy dla damki
-//dodać sprawdzanie warunków końca gry, fanfary i jumbotron żeby wjechał + czy wszystko z tym pasuje
+//ekran wybór koloru pionków na początku
+//generowanie szachownicy i pozycji startowej z przyjęciem argumentu wyboru
 //random ai
-//generate graveyard?
+//ruchy damki: funkcja sprawdzająca czy na przekątnej można bić, dodać funkcję sprawdzającą ruchy dla damki
+//obracanie szachownicy
 
 //naprawić eroory w konsoli
 //alert o biciu
 
-//obracanie szachownicy
-//wybór koloru pionków w dowolnym momencie
-
+//wybór koloru pionków w dowolnym momencie?
 //dać też inne rozmiary niż 8x8
 //unhold na body
+//drag and drop
 
 //warunki remisu, no i podział końca gry na wygrana/porażka/remis
 
 // PRZEJRZYSTOŚĆ KODU
 //za dużo zmiennej z klikniętą bierką - wyłączyć ją i tylko zmieniać jej zawartość
 //w ogóle elementy querySelector na zewnątz funkcji
-//rozdzielić generateboard na mniejsze funkcje
 //opisac funkcje
 //dodac typy zmiennych
-//mniejsze funkcje wszędzie generalnie
-//piece unhold na mniejsze funkcje
+//mniejsze funkcje wszędzie generalnie, szczegolnie move, generateboard, pieceunhold
 //forcedcapture - po co to
 //readme github
-
-//generateboard naprawić, żeby najpierw wszystko stworzyło, potem dało do DOMa
+//funkcje po kolei umiejscowic w kodzie
+//zamiast clicked piece == this?

@@ -1,3 +1,7 @@
+* {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
 body {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -15,8 +19,7 @@ body {
           flex-flow: column;
 }
 
-.capturedPiecesTop,
-.capturedPiecesBottom {
+.capturedPieces {
   height: 6px;
   margin: 10px;
   display: -webkit-box;
@@ -29,12 +32,48 @@ body {
 }
 
 .button {
-  margin-top: 5px;
-  margin-right: 30px;
+  -webkit-transition: 0.5s;
+  transition: 0.5s;
+  font-size: 18px;
   height: 50px;
   width: 150px;
+  background-color: lightgrey;
+}
+
+.button--reset {
+  margin-top: 5px;
+  margin-right: 30px;
   text-transform: capitalize;
-  font-size: 18px;
+  border-radius: 12px;
+  border: .8px solid black;
+}
+
+.button--reset:hover {
+  background-color: rgba(255, 0, 0, 0.75);
+  color: white;
+}
+
+.button--color {
+  text-transform: uppercase;
+  border: 2px solid black;
+  font-weight: 400;
+  margin-top: 100px;
+}
+
+.button--white:hover {
+  background-color: white;
+  font-weight: 700;
+}
+
+.button--black:hover {
+  background-color: black;
+  font-weight: 700;
+  color: white;
+}
+
+.question {
+  text-transform: uppercase;
+  font-weight: 550;
 }
 
 .board {
@@ -74,7 +113,7 @@ body {
   padding: auto;
   text-align: center;
   font-weight: 700;
-  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+  font-size: 18px;
 }
 
 .grid__square--nameCol {
@@ -103,18 +142,45 @@ body {
 .piece--black {
   background-color: black;
   border-color: white;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
+.piece--black .piece--queenDecoration {
+  border-color: white;
 }
 
 .piece--white {
   background-color: white;
   border-color: black;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
 }
 
-.piece--queen {
+.piece--white .piece--queenDecoration {
+  border-color: black;
+}
+
+.piece--queenDecoration {
   border-radius: 60px;
   width: 30px;
   height: 30px;
   background-color: gray;
+  border: 1.5px solid;
 }
 
 .piece__mini {
@@ -132,6 +198,13 @@ body {
 .piece__mini--black {
   border-color: white;
   background-color: black;
+}
+
+.piece:hover .piece--queenDecoration,
+#pieceClicked .piece--queenDecoration {
+  background-color: rgba(153, 0, 0, 0.75);
+  -webkit-transition: 0.3s;
+  transition: 0.3s;
 }
 
 #pieceClicked,
@@ -154,7 +227,6 @@ body {
   display: -ms-flexbox;
   display: flex;
   text-transform: uppercase;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 20px;
   font-weight: 550;
 }
