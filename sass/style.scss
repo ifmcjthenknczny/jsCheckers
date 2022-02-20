@@ -65,12 +65,14 @@ body {
     &--white:hover {
         background-color: white;
         font-weight: 900;
+        box-shadow: 0px 0px 40px 9px #808080;
     }
 
     &--black:hover {
         background-color: black;
         font-weight: 900;
         color: white;
+        box-shadow: 0px 0px 40px 9px #606060;
     }
 }
 
@@ -146,21 +148,17 @@ body {
     &--black {
         background-color: black;
         border-color: white;
-
         & .piece--queenDecoration {
             border-color: white;
         }
     }
-
     &--white {
         background-color: white;
         border-color: black;
-
         & .piece--queenDecoration {
             border-color: black;
         }
     }
-
     &--queenDecoration {
         border-radius: $pieceSize;
         width: $pieceSize / 2;
@@ -170,7 +168,7 @@ body {
     }
 }
 
-.piece__mini {
+.miniPiece {
     width: $minipieceSize;
     height: $minipieceSize;
     border-radius: 50%;
@@ -188,12 +186,12 @@ body {
         border-color: white;
         background-color: black;
     }
+
     &--queen {
         border-radius: 50%;
         background-color: darkgrey;
         width: $minipieceSize/2;
         height: $minipieceSize/2;
-        // border: .8px solid grey;
     }
 }
 
@@ -222,10 +220,8 @@ body {
     text-transform: uppercase;
     font-size: 20px;
     font-weight: 550;
-
     &__turnCounter {
         margin-left: $squareSize * 5;
-
         span {
             font-weight: 700;
         }
@@ -236,10 +232,9 @@ body {
             font-weight: 700;
             color: black;
             text-shadow: none;
-
             &.white {
                 color: white;
-                -webkit-text-stroke: 0.8px black;
+                -webkit-text-stroke: 0.7px black;
             }
         }
     }

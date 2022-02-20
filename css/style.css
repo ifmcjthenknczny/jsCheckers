@@ -66,12 +66,16 @@ body {
 .button--white:hover {
   background-color: white;
   font-weight: 900;
+  -webkit-box-shadow: 0px 0px 40px 9px #808080;
+          box-shadow: 0px 0px 40px 9px #808080;
 }
 
 .button--black:hover {
   background-color: black;
   font-weight: 900;
   color: white;
+  -webkit-box-shadow: 0px 0px 40px 9px #606060;
+          box-shadow: 0px 0px 40px 9px #606060;
 }
 
 .question {
@@ -192,7 +196,7 @@ body {
   border: 1.5px solid;
 }
 
-.piece__mini {
+.miniPiece {
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -208,17 +212,17 @@ body {
           justify-content: center;
 }
 
-.piece__mini--white {
+.miniPiece--white {
   border-color: black;
   background-color: white;
 }
 
-.piece__mini--black {
+.miniPiece--black {
   border-color: white;
   background-color: black;
 }
 
-.piece__mini--queen {
+.miniPiece--queen {
   border-radius: 50%;
   background-color: darkgrey;
   width: 3px;
@@ -272,6 +276,6 @@ body {
 
 .gameInfo__whoToMove span.white {
   color: white;
-  -webkit-text-stroke: 0.8px black;
+  -webkit-text-stroke: 0.7px black;
 }
 /*# sourceMappingURL=style.css.map */

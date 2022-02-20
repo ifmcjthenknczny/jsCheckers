@@ -7,17 +7,16 @@ function generateBoard() {
     const main = document.querySelector('main');
     const grid = document.createElement('section');
     grid.classList.add('board');
-    // const grid = document.querySelector(".board");
-    playWhite ? rows.reverse() : rows;
-    playWhite ? cols : cols.reverse();
+    const rowOrder = playWhite ? [...rows].reverse() : [...rows];
+    const colOrder = playWhite ? [...cols] : [...cols].reverse();
 
-    for (let rowName of rows) {
+    for (let rowName of rowOrder) {
         whiteSquare = !whiteSquare;
         const squareWithName = document.createElement('div');
         squareWithName.classList.add('grid__square--nameRow', 'grid__square--name');
         squareWithName.innerText = rowName;
         grid.append(squareWithName);
-        for (let colName of cols) {
+        for (let colName of colOrder) {
             const square = document.createElement('div');
             const nameOfSquare = `${colName + rowName}`;
             square.classList.add('grid__square');
@@ -34,7 +33,7 @@ function generateBoard() {
         }
     }
     grid.append(document.createElement('div'));
-    for (let colName of cols) {
+    for (let colName of colOrder) {
         const squareWithName = document.createElement('div');
         squareWithName.classList.add('grid__square--nameCol', 'grid__square--name');
         squareWithName.innerText = colName;
@@ -42,8 +41,6 @@ function generateBoard() {
     }
     main.appendChild(grid);
     document.body.appendChild(main);
-    playWhite ? rows.reverse() : rows;
-    playWhite ? cols : cols.reverse();
 }
 
 function generateStartPosition() {
@@ -77,12 +74,14 @@ function pieceUnhold() {
 
 function removeLegalMovesMark() {
     if (document.querySelectorAll('.legalMove'))
-        for (let element of document.querySelectorAll('.legalMove')) element.remove();
+        for (let legalMoveMark of document.querySelectorAll('.legalMove')) legalMoveMark.remove();
 }
 
 function movePiece() {
     const clickedPiece = document.querySelector('#pieceClicked');
-    if (clickedPiece && this.firstElementChild.classList.contains('legalMove') && orderOfTurns()) {
+    const legalSquare = this.firstElementChild.classList.contains('legalMove');
+    // prettier-ignore
+    if (!!clickedPiece && legalSquare && orderOfTurns()) {
 
         if (forcedCapture) {
             removeCapturedPiece(findSquareBetween(clickedPiece.parentElement.id, this.id));
@@ -101,7 +100,6 @@ function movePiece() {
             const queenDecoration = document.createElement('div');
             queenDecoration.classList.add("piece--queenDecoration");
             clickedPiece.appendChild(queenDecoration);
-            // removeLegalMovesMark();
         }
         lastMoveBlack = !lastMoveBlack;
         pieceUnhold();
@@ -148,11 +146,11 @@ function removeCapturedPiece(square) {
     square.firstChild.remove();
 
     const pieceMini = document.createElement('div');
-    lastMoveBlack ? pieceMini.classList.add('piece__mini--black') : pieceMini.classList.add('piece__mini--white');
-    pieceMini.classList.add('piece__mini')
+    lastMoveBlack ? pieceMini.classList.add('miniPiece--black') : pieceMini.classList.add('miniPiece--white');
+    pieceMini.classList.add('miniPiece')
     if (isQueen) {
         const queenDecoration = document.createElement('div');
-        queenDecoration.classList.add('piece__mini--queen');
+        queenDecoration.classList.add('miniPiece--queen');
         pieceMini.appendChild(queenDecoration);
     }
     const graveyardName = !lastMoveBlack ? '.capturedPieces--top' : '.capturedPieces--bottom';
@@ -166,18 +164,6 @@ function promotion(piece) {
     }
     return false
 }
-
-// function resetGame() {
-//     removeLegalMovesMark();
-//     const allPieces = document.querySelectorAll('.piece');
-//     for (let piece of allPieces) piece.remove();
-//     lastMoveBlack = true;
-//     turn = 1;
-//     generateStartPosition();
-//     document.querySelector('.gameInfo').remove();
-//     generateGameInfo();
-//     for (let graveyard of document.querySelectorAll('.capturedPieces')) graveyard.innerHTML = '';
-// }
 
 function generateButtons() {
     const resetButton = document.createElement('button');
@@ -219,9 +205,8 @@ function orderOfTurns() {
 }
 
 function isThereACapturePossibilty() {
-    let allColorPieces;
-    if (lastMoveBlack) allColorPieces = document.querySelectorAll('.piece--white');
-    else allColorPieces = document.querySelectorAll('.piece--black');
+    const selector = lastMoveBlack ? '.piece--white' : '.piece--black';
+    const allColorPieces = document.querySelectorAll(selector);
 
     for (let piece of allColorPieces) {
         if (legalCapturesOfPiece(piece).length > 0) {
@@ -243,53 +228,47 @@ function legalCapturesOfPiece(piece) {
     const capturesPossible = [];
 
     const colorCoeff = isPieceWhite ? 1 : -1;
-    if (!isPieceWhite) rows.reverse();
+    const rowOrder = isPieceWhite ? [...rows] : [...rows].reverse();
 
-    // captures
     if (pieceCol !== cols[cols.length - 2] && pieceCol !== cols[cols.length - 1]) {
-        if (pieceRow !== rows[rows.length - 2] && pieceRow !== rows[rows.length - 1]) captureCandidates.push(`${cols[cols.indexOf(pieceCol)+2]}${pieceRow+2*colorCoeff}`);
-        if (pieceRow !== rows[0] && pieceRow !== rows[1]) captureCandidates.push(`${cols[cols.indexOf(pieceCol)+2]}${pieceRow-2*colorCoeff}`);
+        if (pieceRow !== rowOrder[rowOrder.length - 2] && pieceRow !== rowOrder[rowOrder.length - 1]) captureCandidates.push(`${cols[cols.indexOf(pieceCol)+2]}${pieceRow+2*colorCoeff}`);
+        if (pieceRow !== rowOrder[0] && pieceRow !== rowOrder[1]) captureCandidates.push(`${cols[cols.indexOf(pieceCol)+2]}${pieceRow-2*colorCoeff}`);
     }
     if (pieceCol !== cols[0] && pieceCol !== cols[1]) {
-        if (pieceRow !== rows[rows.length - 2] && pieceRow !== rows[rows.length - 1]) captureCandidates.push(`${cols[cols.indexOf(pieceCol)-2]}${pieceRow+2*colorCoeff}`);
-        if (pieceRow !== rows[0] && pieceRow !== rows[1]) captureCandidates.push(`${cols[cols.indexOf(pieceCol)-2]}${pieceRow-2*colorCoeff}`);
+        if (pieceRow !== rowOrder[rowOrder.length - 2] && pieceRow !== rowOrder[rowOrder.length - 1]) captureCandidates.push(`${cols[cols.indexOf(pieceCol)-2]}${pieceRow+2*colorCoeff}`);
+        if (pieceRow !== rowOrder[0] && pieceRow !== rowOrder[1]) captureCandidates.push(`${cols[cols.indexOf(pieceCol)-2]}${pieceRow-2*colorCoeff}`);
     }
 
-    //checks if there is a piece to capture and square not occupied
+    //checks if target square is not occupierd and there is a piece to capture
     for (let captureCandidate of captureCandidates) {
         const targetSquare = document.querySelector(`#${captureCandidate}`);
         if (!targetSquare.firstElementChild && isThereAPieceToCapture(pieceSquare, captureCandidate)) capturesPossible.push(targetSquare);
     }
-    if (!isPieceWhite) rows.reverse();
 
     return capturesPossible
 }
 
 function legalNormalMovesOfPiece(piece) {
-    const pieceSquare = piece.parentElement.id;
-    const pieceCol = pieceSquare.split('')[0];
-    const pieceRow = parseInt(pieceSquare.split('')[1]);
+    let [pieceCol, pieceRow] = piece.parentElement.id;
+    pieceRow = +pieceRow;
     const isPieceWhite = piece.classList.contains('piece--white');
 
     const normalMoveCandidates = [];
     const normalMovesPossible = [];
 
     const colorCoeff = isPieceWhite ? 1 : -1;
-    if (!isPieceWhite) rows.reverse();
+    const rowOrder = isPieceWhite ? [...rows] : [...rows].reverse();
 
-    // normal move - if not last row
-    if (pieceRow !== rows[rows.length - 1]) {
+    if (pieceRow !== rowOrder[rowOrder.length - 1]) {
         if (pieceCol !== cols[0]) normalMoveCandidates.push(`${cols[cols.indexOf(pieceCol)-1]}${pieceRow+colorCoeff}`);
         if (pieceCol !== cols[cols.length - 1]) normalMoveCandidates.push(`${cols[cols.indexOf(pieceCol)+1]}${pieceRow+colorCoeff}`);
     }
 
-    //check if square is occupied by another piece
+    //checks if square is not occupied by another piece
     for (let normalMoveCandidate of normalMoveCandidates) {
         const targetSquare = document.querySelector(`#${normalMoveCandidate}`);
         if (!targetSquare.firstElementChild) normalMovesPossible.push(targetSquare);
     }
-
-    if (!isPieceWhite) rows.reverse(); //wraca do zwykłej, nieodwróconej kolejności rzędów
 
     return normalMovesPossible
 }
@@ -320,7 +299,7 @@ function generateLegalMovesMark(legalMovesList) {
 function generateGraveyards() {
     const graveyardTop = document.createElement('section');
     const graveyardBottom = document.createElement('section');
-    for (graveyard of [graveyardTop, graveyardBottom]) graveyard.classList.add('capturedPieces');
+    for (let graveyard of [graveyardTop, graveyardBottom]) graveyard.classList.add('capturedPieces');
     graveyardTop.classList.add('capturedPieces--top');
     graveyardBottom.classList.add('capturedPieces--bottom');
     const main = document.querySelector('main');
@@ -388,7 +367,6 @@ let forcedCapture = false;
 let lastMoveBlack = true;
 let playWhite = true;
 // let vsComputer = false;
-// let clickedPiece;
 generateFirstChoice();
 
 // TO DO CSS HTML
@@ -404,11 +382,16 @@ generateFirstChoice();
 //mała damka
 //wyśrodkować gameinfo
 //dopieścić okno wyboru na początku
+//gladkie przejscie miedzy oknem wyboru i szachownica
 
 // TO DO LOGIKA JS
 //ruchy damki: funkcja sprawdzająca czy na przekątnej można bić, dodać funkcję sprawdzającą ruchy dla damki
+//warunki remisu i komunikat - po 15 ruchów damkami bez zmniejszania liczby pionów na planszy
+
+/* Damki mogą poruszać się w jednym ruchu o dowolną liczbę pól do przodu lub do tyłu po przekątnej, zatrzymując się na wolnych polach.
+Bicie damką jest możliwe z dowolnej odległości po linii przekątnej i następuje przez przeskoczenie pionu (lub damki) przeciwnika, za którym musi znajdować się co najmniej jedno wolne pole -- damka przeskakuje na dowolne z tych pól i może kontynuować bicie (na tej samej lub prostopadłej linii). */
+
 //2 players vs random ai (po damce) + okno wyboru + obracanie szachownicy po każdym ruchu
-//cofanie ruchów
 
 //naprawić eroory w konsoli
 //alert o biciu
@@ -417,8 +400,8 @@ generateFirstChoice();
 //dać też inne rozmiary niż 8x8
 //unhold na body
 //drag and drop
+//log ruchów & cofanie
 
-//warunki remisu, no i podział końca gry na wygrana/porażka/remis
 
 // PRZEJRZYSTOŚĆ KODU
 //za dużo zmiennej z klikniętą bierką - wyłączyć ją i tylko zmieniać jej zawartość
