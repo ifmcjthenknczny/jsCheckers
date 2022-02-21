@@ -223,10 +223,8 @@ body {
 }
 
 .miniPiece--queen {
-  border-radius: 50%;
   background-color: darkgrey;
-  width: 3px;
-  height: 3px;
+  border-color: black;
 }
 
 .piece:hover .piece--queenDecoration,

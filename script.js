@@ -2,6 +2,10 @@ function range(size, startAt = 0) {
     return [...Array(size).keys()].map(i => i + startAt);
 }
 
+function onlyUnique(value, index, self) {
+    return self.indexOf(value) === index;
+}
+
 function generateBoard() {
     let whiteSquare = false;
     const main = document.querySelector('main');
@@ -82,6 +86,7 @@ function movePiece() {
     const legalSquare = this.firstElementChild.classList.contains('legalMove');
     // prettier-ignore
     if (!!clickedPiece && legalSquare && orderOfTurns()) {
+        (clickedPiece.classList.contains('piece--queen') && !forcedCapture) ? onlyQueenMovesWithoutCapture++ : onlyQueenMovesWithoutCapture = 0;
 
         if (forcedCapture) {
             removeCapturedPiece(findSquareBetween(clickedPiece.parentElement.id, this.id));
@@ -115,7 +120,9 @@ function movePiece() {
 
 function congratsToWinner() {
     const whoToMove = document.querySelector(".gameInfo__whoToMove");
-    if (lastMoveBlack) {
+    if (onlyQueenMovesWithoutCapture >= 30) {
+        whoToMove.innerHTML = 'It is a <span>Draw</span>!'
+    } else if (lastMoveBlack) {
         whoToMove.innerHTML = '<span>Black</span> won!'
     } else {
         whoToMove.innerHTML = '<span class="white">White</span> won!'
@@ -142,22 +149,24 @@ function changeGameInfo() {
 }
 
 function removeCapturedPiece(square) {
-    const isQueen = (square.firstChild.firstChild !== null);
+    const isQueen = square.firstChild.classList.contains('piece--queen');
     square.firstChild.remove();
 
     const pieceMini = document.createElement('div');
-    lastMoveBlack ? pieceMini.classList.add('miniPiece--black') : pieceMini.classList.add('miniPiece--white');
+    if (isQueen) pieceMini.classList.add('miniPiece--queen');
+    else lastMoveBlack ? pieceMini.classList.add('miniPiece--black') : pieceMini.classList.add('miniPiece--white');
     pieceMini.classList.add('miniPiece')
-    if (isQueen) {
-        const queenDecoration = document.createElement('div');
-        queenDecoration.classList.add('miniPiece--queen');
-        pieceMini.appendChild(queenDecoration);
-    }
+    // if (isQueen) {
+    //     const queenDecoration = document.createElement('div');
+    //     queenDecoration.classList.add('miniPiece--queen');
+    //     pieceMini.appendChild(queenDecoration);
+    // }
     const graveyardName = !lastMoveBlack ? '.capturedPieces--top' : '.capturedPieces--bottom';
     document.querySelector(graveyardName).appendChild(pieceMini);
 }
 
 function promotion(piece) {
+    if (piece.classList.contains('piece--queen')) return false;
     const [, clickedPieceRow] = piece.parentElement.id;
     if ((lastMoveBlack && clickedPieceRow === '8') || (!lastMoveBlack && clickedPieceRow === '1')) {
         return true
@@ -183,13 +192,13 @@ function endOfGame() {
     const stillPieces = (document.querySelectorAll(selector)).length;
     if (stillPieces === 0) return true;
     if (!checkIfThereArePossibleMoves()) return true;
+    if (onlyQueenMovesWithoutCapture >= 30) return true;
     return false
 }
 
 function checkIfThereArePossibleMoves() {
     const selector = lastMoveBlack ? ".piece--white" : ".piece--black";
-    const allColorPieces = [];
-    for (let piece of document.querySelectorAll(selector)) allColorPieces.push(piece);
+    const allColorPieces = [...document.querySelectorAll(selector)];
     const legalNormalMoves = allColorPieces.map(p => legalNormalMovesOfPiece(p).length);
     const legalCaptures = allColorPieces.map(p => legalCapturesOfPiece(p).length);
     const legalMoves = legalNormalMoves.concat(legalCaptures);
@@ -220,8 +229,8 @@ function isThereACapturePossibilty() {
 
 function legalCapturesOfPiece(piece) {
     const pieceSquare = piece.parentElement.id;
-    const pieceCol = pieceSquare.split('')[0];
-    const pieceRow = parseInt(pieceSquare.split('')[1]);
+    let [pieceCol, pieceRow] = pieceSquare;
+    pieceRow = +pieceRow;
     const isPieceWhite = piece.classList.contains('piece--white');
 
     const captureCandidates = [];
@@ -252,25 +261,55 @@ function legalNormalMovesOfPiece(piece) {
     let [pieceCol, pieceRow] = piece.parentElement.id;
     pieceRow = +pieceRow;
     const isPieceWhite = piece.classList.contains('piece--white');
+    const isPieceQueen = piece.classList.contains('piece--queen');
 
-    const normalMoveCandidates = [];
-    const normalMovesPossible = [];
+    let normalMoveCandidates = [];
+    let normalMovesPossible = [];
 
     const colorCoeff = isPieceWhite ? 1 : -1;
     const rowOrder = isPieceWhite ? [...rows] : [...rows].reverse();
 
-    if (pieceRow !== rowOrder[rowOrder.length - 1]) {
-        if (pieceCol !== cols[0]) normalMoveCandidates.push(`${cols[cols.indexOf(pieceCol)-1]}${pieceRow+colorCoeff}`);
-        if (pieceCol !== cols[cols.length - 1]) normalMoveCandidates.push(`${cols[cols.indexOf(pieceCol)+1]}${pieceRow+colorCoeff}`);
+    if (!isPieceQueen) {
+        if (pieceRow !== rowOrder[rowOrder.length - 1]) {
+            if (pieceCol !== cols[0]) normalMoveCandidates.push(`${cols[cols.indexOf(pieceCol)-1]}${pieceRow+colorCoeff}`);
+            if (pieceCol !== cols[cols.length - 1]) normalMoveCandidates.push(`${cols[cols.indexOf(pieceCol)+1]}${pieceRow+colorCoeff}`);
+        }
+        //checks if square is not occupied by another piece
+        for (let normalMoveCandidate of normalMoveCandidates) {
+            const targetSquare = document.querySelector(`#${normalMoveCandidate}`);
+            if (!targetSquare.firstElementChild) normalMovesPossible.push(targetSquare);
+        }
+    } else {
+        for (let colsUp of [true, false]) {
+            for (let rowsUp of [true, false]) {
+                normalMovesPossible.push(...diagonalQueenMoves(piece.parentElement.id, colsUp, rowsUp));
+            }
+        }
     }
-
-    //checks if square is not occupied by another piece
-    for (let normalMoveCandidate of normalMoveCandidates) {
-        const targetSquare = document.querySelector(`#${normalMoveCandidate}`);
-        if (!targetSquare.firstElementChild) normalMovesPossible.push(targetSquare);
-    }
-
     return normalMovesPossible
+}
+
+function diagonalQueenMoves(startingSquare, colsIncrease, rowsIncrease) {
+    let [startingCol, startingRow] = startingSquare;
+    let rowIndex = rows.indexOf(+startingRow);
+    let colIndex = cols.indexOf(startingCol);
+    const possibleSquares = [];
+    const colBoundary = colsIncrease ? cols.length - 1 : 0;
+    const rowBoundary = rowsIncrease ? rows.length - 1 : 0;
+    const deltaCol = colsIncrease ? 1 : -1;
+    const deltaRow = rowsIncrease ? 1 : -1;
+    colIndex += deltaCol;
+    rowIndex += deltaRow;
+    while (rowIndex !== rowBoundary + deltaRow && colIndex !== colBoundary + deltaCol) {
+        const squareName = `${cols[colIndex]}${rowIndex+1}`;
+        const square = document.querySelector(`#${squareName}`);
+        if (!!square.firstChild) {
+            if (square.firstChild.classList.contains('piece')) return possibleSquares;
+        } else possibleSquares.push(square);
+        colIndex += deltaCol;
+        rowIndex += deltaRow;
+    }
+    return possibleSquares
 }
 
 function isThereAPieceToCapture(originalSquare, targetSquare) {
@@ -278,6 +317,7 @@ function isThereAPieceToCapture(originalSquare, targetSquare) {
     if (squareBetween.firstElementChild) {
         if ((squareBetween.firstElementChild.classList.contains('piece--white') && !lastMoveBlack) || (squareBetween.firstElementChild.classList.contains('piece--black') && lastMoveBlack)) return true;
     }
+    // dodać damkę
     return false
 }
 
@@ -285,7 +325,7 @@ function findSquareBetween(originalSquare, targetSquare) {
     const [originalCol, originalRow] = originalSquare;
     const [targetCol, targetRow] = targetSquare;
 
-    return document.querySelector(`#${cols[(cols.indexOf(originalCol)+cols.indexOf(targetCol))/2]}${(parseInt(originalRow)+parseInt(targetRow))/2}`);
+    return document.querySelector(`#${cols[(cols.indexOf(originalCol)+cols.indexOf(targetCol))/2]}${(+originalRow+(+(targetRow)))/2}`);
 }
 
 function generateLegalMovesMark(legalMovesList) {
@@ -366,6 +406,7 @@ let turn = 1;
 let forcedCapture = false;
 let lastMoveBlack = true;
 let playWhite = true;
+let onlyQueenMovesWithoutCapture = 0;
 // let vsComputer = false;
 generateFirstChoice();
 
@@ -385,13 +426,14 @@ generateFirstChoice();
 //gladkie przejscie miedzy oknem wyboru i szachownica
 
 // TO DO LOGIKA JS
-//ruchy damki: funkcja sprawdzająca czy na przekątnej można bić, dodać funkcję sprawdzającą ruchy dla damki
-//warunki remisu i komunikat - po 15 ruchów damkami bez zmniejszania liczby pionów na planszy
+//bicia damki: funkcja sprawdzająca czy na przekątnej można bić, dodać do funkcji sprawdzanie czy trzymasz damkę i jej możliwe ruchy
 
 /* Damki mogą poruszać się w jednym ruchu o dowolną liczbę pól do przodu lub do tyłu po przekątnej, zatrzymując się na wolnych polach.
-Bicie damką jest możliwe z dowolnej odległości po linii przekątnej i następuje przez przeskoczenie pionu (lub damki) przeciwnika, za którym musi znajdować się co najmniej jedno wolne pole -- damka przeskakuje na dowolne z tych pól i może kontynuować bicie (na tej samej lub prostopadłej linii). */
+
+Bicie damką jest możliwe z dowolnej odległości po linii przekątnej i następuje przez przeskoczenie pionu (lub damki) przeciwnika, za którym musi znajdować się co najmniej jedno wolne pole - damka przeskakuje na dowolne z tych pól i może kontynuować bicie (na tej samej lub prostopadłej linii). */
 
 //2 players vs random ai (po damce) + okno wyboru + obracanie szachownicy po każdym ruchu
+//najlepsze bicia
 
 //naprawić eroory w konsoli
 //alert o biciu
@@ -404,8 +446,8 @@ Bicie damką jest możliwe z dowolnej odległości po linii przekątnej i nastę
 
 
 // PRZEJRZYSTOŚĆ KODU
-//za dużo zmiennej z klikniętą bierką - wyłączyć ją i tylko zmieniać jej zawartość
-//w ogóle elementy querySelector na zewnątz funkcji
+//za dużo zmiennej z klikniętą bierką - wyłączyć ją i tylko zmieniać jej zawartość? dodać jako argument?
+//w ogóle elementy querySelector na zewnątz ?
 //opisac funkcje
 //dodac typy zmiennych
 //mniejsze funkcje wszędzie generalnie, szczegolnie move, generateboard, pieceunhold
@@ -414,3 +456,4 @@ Bicie damką jest możliwe z dowolnej odległości po linii przekątnej i nastę
 //funkcje po kolei umiejscowic w kodzie
 //zamiast clicked piece == this?
 //wrzucić na hosting
+//żeby wyrzucało w jednym typie zmiennej

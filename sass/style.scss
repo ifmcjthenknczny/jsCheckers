@@ -188,10 +188,11 @@ body {
     }
 
     &--queen {
-        border-radius: 50%;
+        // border-radius: 50%;
         background-color: darkgrey;
-        width: $minipieceSize/2;
-        height: $minipieceSize/2;
+        // width: $minipieceSize/2;
+        // height: $minipieceSize/2;
+        border-color: black;
     }
 }
 
