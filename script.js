@@ -55,8 +55,10 @@ function generateStartPosition() {
         const piece = document.createElement('div');
         piece.classList.add('piece');
         if (i < 3 * 4) piece.classList.add(order[0]);
-        else if (i >= 5 * 4) piece.classList.add(order[1]);
-        piece.addEventListener('click', pieceHold);
+        else if (i >= 5 * 4) {
+            piece.classList.add(order[1]);
+            piece.addEventListener('click', pieceHold);
+        }
         if (i < 3 * 4 || i >= 5 * 4) blackSquares[i].append(piece);
     }
 }
@@ -125,7 +127,7 @@ async function computerMove() {
 
     (pieceToMove.classList.contains('piece--queen') && !forcedCapture) ? onlyQueenMovesWithoutCapture++ : onlyQueenMovesWithoutCapture = 0;
 
-    await sleep(1000);
+    await sleep(800);
 
     if (forcedCapture) removeCapturedPiece(findSquareOfAPieceToCapture(pieceToMove.parentElement.id, targetSquare.id));
     targetSquare.appendChild(pieceToMove);
@@ -542,7 +544,7 @@ generateTitleWindow();
 //podświetlić też CHOOSE YOUR COLOR kiedy najedzie się na któryś przycisk na oknie startowym
 
 // PRZEJRZYSTOŚĆ KODU
-//scalić funkcje ruchów damki i zwykłych pionków do jednej, mniejsze funkcje wszędzie generalnie, szczegolnie move, generateboard
+//scalić funkcje ruchów damki i zwykłych pionków do jednej, mniejsze funkcje wszędzie generalnie, szczegolnie move dla obu przypadków, generateboard
 //forcedcapture - po co to i dlaczego musi być
 //za dużo zmiennej z klikniętą bierką - wyłączyć ją i tylko zmieniać jej zawartość? dodać jako argument?, w ogóle elementy querySelector na zewnątz?
 //opisac funkcje
