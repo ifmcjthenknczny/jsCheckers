@@ -19,6 +19,64 @@ body {
           flex-flow: column;
 }
 
+.board {
+  width: 740px;
+  height: 740px;
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: 20px (90px)[8];
+      grid-template-columns: 20px repeat(8, 90px);
+  -ms-grid-rows: (90px)[8] 20px;
+      grid-template-rows: repeat(8, 90px) 20px;
+  grid-auto-flow: row;
+}
+
+.grid__square {
+  width: 90px;
+  height: 90px;
+  border: 1px solid darkgray;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
+.grid__square--black {
+  background-color: rgba(0, 0, 0, 0.333);
+}
+
+.grid__square--white {
+  background-color: rgba(255, 255, 255, 0.666);
+}
+
+.grid__square--name {
+  padding: auto;
+  text-align: center;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.grid__square--nameCol {
+  text-transform: uppercase;
+}
+
+.grid__square--nameRow {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
 .capturedPieces {
   height: 6px;
   margin: 10px;
@@ -104,9 +162,9 @@ body {
 .author {
   font-family: 'Cookie', cursive;
   font-size: 20px;
-  -ms-flex-item-align: center;
-      -ms-grid-row-align: center;
-      align-self: center;
+  -ms-flex-item-align: end;
+      -ms-grid-row-align: end;
+      align-self: end;
   text-decoration: underline;
 }
 
@@ -131,62 +189,6 @@ body {
   -webkit-box-pack: justify;
       -ms-flex-pack: justify;
           justify-content: space-between;
-}
-
-.board {
-  display: -ms-grid;
-  display: grid;
-  -ms-grid-columns: 20px (90px)[8];
-      grid-template-columns: 20px repeat(8, 90px);
-  -ms-grid-rows: (90px)[8] 20px;
-      grid-template-rows: repeat(8, 90px) 20px;
-  grid-auto-flow: row;
-}
-
-.grid__square {
-  width: 90px;
-  height: 90px;
-  border: 1px solid darkgray;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-}
-
-.grid__square--black {
-  background-color: rgba(0, 0, 0, 0.333);
-}
-
-.grid__square--white {
-  background-color: rgba(255, 255, 255, 0.666);
-}
-
-.grid__square--name {
-  padding: auto;
-  text-align: center;
-  font-weight: 700;
-  font-size: 18px;
-}
-
-.grid__square--nameCol {
-  text-transform: uppercase;
-}
-
-.grid__square--nameRow {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
 }
 
 .piece {
@@ -227,7 +229,7 @@ body {
   border-radius: 60px;
   width: 30px;
   height: 30px;
-  background-color: darkgray;
+  background-color: #767676;
   border: 1.5px solid;
 }
 
@@ -235,7 +237,7 @@ body {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  border: 1.5px solid;
+  border: 1.5px solid black;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -248,18 +250,16 @@ body {
 }
 
 .miniPiece--white {
-  border-color: black;
   background-color: white;
 }
 
 .miniPiece--black {
-  border-color: white;
   background-color: black;
+  border-color: grey;
 }
 
 .miniPiece--queen {
   background-color: darkgrey;
-  border-color: black;
 }
 
 .piece:hover .piece--queenDecoration,
@@ -288,17 +288,26 @@ body {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: end;
   text-transform: uppercase;
   font-size: 20px;
   font-weight: 550;
-}
-
-.gameInfo__turnCounter {
-  margin-left: 450px;
+  width: 740px;
 }
 
 .gameInfo__turnCounter span {
   font-weight: 700;
+}
+
+.gameInfo__whoToMove {
+  margin-right: auto;
+  margin-left: 20px;
 }
 
 .gameInfo__whoToMove span {
