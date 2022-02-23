@@ -1,4 +1,52 @@
-* {
+@media (max-width: 699px) {
+  html {
+    font-size: 1.23552vh;
+  }
+  .board {
+    width: 90vw;
+    height: 90vw;
+  }
+  .gameInfo {
+    width: 90vw;
+    margin-top: 20vh;
+  }
+  .gameInfo__whoToMove {
+    margin-left: 2.43243vw;
+  }
+  .container {
+    width: 81vw;
+  }
+}
+
+@media (min-width: 700px) {
+  html {
+    font-size: 2.16216vh;
+  }
+  .board {
+    width: 80vh;
+    height: 80vh;
+  }
+  .gameInfo {
+    width: 80vh;
+    margin-top: 25vh;
+  }
+  .gameInfo__whoToMove {
+    margin-left: 2.16216vh;
+  }
+  .container {
+    width: 64vh;
+  }
+  .button {
+    width: 150px;
+    height: 50px;
+  }
+  .button--color {
+    width: 30%;
+    height: 10%;
+  }
+}
+
+html {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -20,20 +68,17 @@ body {
 }
 
 .board {
-  width: 740px;
-  height: 740px;
+  overflow: none;
   display: -ms-grid;
   display: grid;
-  -ms-grid-columns: 20px (90px)[8];
-      grid-template-columns: 20px repeat(8, 90px);
-  -ms-grid-rows: (90px)[8] 20px;
-      grid-template-rows: repeat(8, 90px) 20px;
+  -ms-grid-columns: 0.2fr (1fr)[8];
+      grid-template-columns: 0.2fr repeat(8, 1fr);
+  -ms-grid-rows: (1fr)[8] 0.2fr;
+      grid-template-rows: repeat(8, 1fr) 0.2fr;
   grid-auto-flow: row;
 }
 
 .grid__square {
-  width: 90px;
-  height: 90px;
   border: 1px solid darkgray;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -58,7 +103,7 @@ body {
   padding: auto;
   text-align: center;
   font-weight: 700;
-  font-size: 18px;
+  font-size: 1rem;
 }
 
 .grid__square--nameCol {
@@ -79,7 +124,7 @@ body {
 
 .capturedPieces {
   height: 6px;
-  margin: 10px;
+  margin: 6px;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -92,7 +137,7 @@ body {
 .button {
   -webkit-transition: 0.5s;
   transition: 0.5s;
-  font-size: 20px;
+  font-size: 1rem;
   height: 50px;
   width: 150px;
   background-color: #e9e9e9;
@@ -101,13 +146,13 @@ body {
 }
 
 .button--reset {
-  margin-top: 5px;
-  border-radius: 12px;
+  margin-top: 3px;
+  border-radius: 8%;
   border: .8px solid black;
   font-weight: 650;
 }
 
-.button--reset:hover {
+.button--reset:hover, .button--reset:active {
   background-color: rgba(255, 0, 0, 0.75);
   color: white;
   font-weight: 900;
@@ -115,29 +160,31 @@ body {
 
 .button--color {
   border: 2px solid black;
-  font-size: 28px;
+  font-size: 1.6rem;
   width: 200px;
   height: 75px;
   margin-top: 60px;
 }
 
-.button--white:hover {
+.button--white:hover, .button--white:active {
   background-color: white;
   font-weight: 900;
   -webkit-box-shadow: 0px 0px 40px 9px #808080;
           box-shadow: 0px 0px 40px 9px #808080;
+  font-size: 1.8rem;
 }
 
-.button--black:hover {
+.button--black:hover, .button--black:active {
   background-color: black;
   font-weight: 900;
   color: white;
   -webkit-box-shadow: 0px 0px 40px 9px #606060;
           box-shadow: 0px 0px 40px 9px #606060;
+  font-size: 1.8rem;
 }
 
 .container {
-  margin-top: 230px;
+  margin-top: 25vh;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -145,7 +192,6 @@ body {
   -webkit-box-direction: normal;
       -ms-flex-flow: column;
           flex-flow: column;
-  width: 550px;
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
@@ -156,12 +202,12 @@ body {
   -ms-flex-item-align: center;
       -ms-grid-row-align: center;
       align-self: center;
-  font-size: 200px;
+  font-size: 10rem;
 }
 
 .author {
   font-family: 'Cookie', cursive;
-  font-size: 20px;
+  font-size: 1rem;
   -ms-flex-item-align: end;
       -ms-grid-row-align: end;
       align-self: end;
@@ -169,10 +215,9 @@ body {
 }
 
 .question {
-  margin-top: 100px;
   text-transform: uppercase;
   font-weight: 650;
-  font-size: 50px;
+  font-size: 2.8rem;
   -ms-flex-item-align: center;
       -ms-grid-row-align: center;
       align-self: center;
@@ -192,9 +237,9 @@ body {
 }
 
 .piece {
-  width: 60px;
-  height: 60px;
-  border-radius: 60px;
+  width: 66.66667%;
+  height: 66.66667%;
+  border-radius: 50%;
   border: 2.5px solid;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -226,10 +271,10 @@ body {
 }
 
 .piece--queenDecoration {
-  border-radius: 60px;
-  width: 30px;
-  height: 30px;
-  background-color: #767676;
+  border-radius: 50%;
+  width: 33.33333%;
+  height: 33.33333%;
+  background-color: #878787;
   border: 1.5px solid;
 }
 
@@ -263,23 +308,25 @@ body {
 }
 
 .piece:hover .piece--queenDecoration,
-#pieceClicked .piece--queenDecoration {
+#pieceClicked .piece--queenDecoration,
+.piece:active .piece--queenDecoration {
   background-color: rgba(153, 0, 0, 0.75);
   -webkit-transition: 0.3s;
   transition: 0.3s;
 }
 
 #pieceClicked,
-.piece:hover {
+.piece:hover,
+.piece:active {
   background-color: rgba(255, 0, 0, 0.75);
   -webkit-transition: 0.3s;
   transition: 0.3s;
 }
 
 .legalMove {
-  width: 30px;
-  height: 30px;
-  border-radius: 90px;
+  width: 33.33333%;
+  height: 33.33333%;
+  border-radius: 50%;
   background-color: #77c1f7;
   border: 1px solid black;
 }
@@ -296,9 +343,8 @@ body {
       -ms-flex-pack: end;
           justify-content: end;
   text-transform: uppercase;
-  font-size: 20px;
+  font-size: 1rem;
   font-weight: 550;
-  width: 740px;
 }
 
 .gameInfo__turnCounter span {
@@ -307,7 +353,6 @@ body {
 
 .gameInfo__whoToMove {
   margin-right: auto;
-  margin-left: 20px;
 }
 
 .gameInfo__whoToMove span {

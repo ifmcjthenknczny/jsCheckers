@@ -545,6 +545,7 @@ generateTitleWindow();
 
 // PRZEJRZYSTOŚĆ KODU
 //scalić funkcje ruchów damki i zwykłych pionków do jednej, mniejsze funkcje wszędzie generalnie, szczegolnie move dla obu przypadków, generateboard
+//na klasy podzielić funkcje, gdzie w sumie biorę to samo - klasy Game i Piece
 //forcedcapture - po co to i dlaczego musi być
 //za dużo zmiennej z klikniętą bierką - wyłączyć ją i tylko zmieniać jej zawartość? dodać jako argument?, w ogóle elementy querySelector na zewnątz?
 //opisac funkcje
