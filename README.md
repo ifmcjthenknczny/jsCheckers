@@ -14,11 +14,11 @@
 ## General info
 This little responsive webpage-app is allows you to play checkers on 8x8 board with a computer opponent. AI is very basic - computer picks random move from the list of available moves.
 
-[Background source] (https://www.toptal.com/designers/subtlepatterns/what-the-hex/)
+[Background source](https://www.toptal.com/designers/subtlepatterns/what-the-hex/)
 
 ## Screenshots
-![Startup window - Android](./screenshots/android-startup.png)
-![Board - Android](./screenshots/android-board.png)
+![Startup window - Android](./screenshots/android-startup.jpg)
+![Board - Android](./screenshots/android-board.jpg)
 ![Startup window - Windows, Firefox](./screenshots/windows-startup.png)
 ![Piece color selection - Windows, Firefox](./screenshots/windows-pieces.png)
 ![Board - Windows, Firefox](./screenshots/windows-board.png)
