@@ -1,20 +1,6 @@
 @media (max-width: 699px) {
   html {
-    font-size: 1.23552vh;
-  }
-  .board {
-    width: 90vw;
-    height: 90vw;
-  }
-  .gameInfo {
-    width: 90vw;
-    margin-top: 20vh;
-  }
-  .gameInfo__whoToMove {
-    margin-left: 2.43243vw;
-  }
-  .container {
-    width: 81vw;
+    font-size: clamp(10px, 2.43243vw, 20px);
   }
 }
 
@@ -22,32 +8,10 @@
   html {
     font-size: 2.16216vh;
   }
-  .board {
-    width: 80vh;
-    height: 80vh;
-  }
-  .gameInfo {
-    width: 80vh;
-    margin-top: 25vh;
-  }
-  .gameInfo__whoToMove {
-    margin-left: 2.16216vh;
-  }
-  .container {
-    width: 64vh;
-  }
-  .button {
-    width: 150px;
-    height: 50px;
-  }
-  .button--color {
-    width: 30%;
-    height: 10%;
-  }
 }
 
 html {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
@@ -147,9 +111,10 @@ body {
 
 .button--reset {
   margin-top: 3px;
-  border-radius: 8%;
+  border-radius: 10%;
   border: .8px solid black;
   font-weight: 650;
+  font-size: 20px;
 }
 
 .button--reset:hover, .button--reset:active {
@@ -159,11 +124,11 @@ body {
 }
 
 .button--color {
-  border: 2px solid black;
+  border: clamp(1px, 0.088vh, 1.5px) solid black;
   font-size: 1.6rem;
+  margin-top: 60px;
   width: 200px;
   height: 75px;
-  margin-top: 60px;
 }
 
 .button--white:hover, .button--white:active {
@@ -240,7 +205,7 @@ body {
   width: 66.66667%;
   height: 66.66667%;
   border-radius: 50%;
-  border: 2.5px solid;
+  border: clamp(1.5px, 0.13184vh, 2.5px) solid;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -272,17 +237,17 @@ body {
 
 .piece--queenDecoration {
   border-radius: 50%;
-  width: 33.33333%;
-  height: 33.33333%;
+  width: 44.44444%;
+  height: 44.44444%;
   background-color: #878787;
-  border: 1.5px solid;
+  border: clamp(1px, 0.088vh, 1.5px) solid;
 }
 
 .miniPiece {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  border: 1.5px solid black;
+  border: clamp(1px, 0.088vh, 1.5px) solid black;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -328,7 +293,7 @@ body {
   height: 33.33333%;
   border-radius: 50%;
   background-color: #77c1f7;
-  border: 1px solid black;
+  border: clamp(1px, 0.088vh, 1.5px) solid black;
 }
 
 .gameInfo {
@@ -343,7 +308,6 @@ body {
       -ms-flex-pack: end;
           justify-content: end;
   text-transform: uppercase;
-  font-size: 1rem;
   font-weight: 550;
 }
 
@@ -364,5 +328,63 @@ body {
 .gameInfo__whoToMove span.white {
   color: white;
   -webkit-text-stroke: 0.7px black;
+}
+
+@media (max-width: 699px) {
+  .board {
+    width: 90vw;
+    height: 90vw;
+  }
+  .gameInfo {
+    width: 90vw;
+    margin-top: 22vh;
+    font-size: 1.4rem;
+  }
+  .gameInfo__whoToMove {
+    margin-left: 2.43243vw;
+  }
+  .container {
+    width: 81vw;
+    margin-top: 35vh;
+  }
+  .question {
+    font-size: 3rem;
+  }
+  .button--color {
+    width: 30vw;
+    height: 6vh;
+  }
+  .button--white {
+    background-color: white;
+    font-weight: 900;
+    font-size: 1.8rem;
+  }
+  .button--black {
+    background-color: black;
+    font-weight: 900;
+    color: white;
+    font-size: 1.8rem;
+  }
+}
+
+@media (min-width: 700px) {
+  .board {
+    width: 80vh;
+    height: 80vh;
+  }
+  .gameInfo {
+    width: 80vh;
+    font-size: 1rem;
+  }
+  .gameInfo__whoToMove {
+    margin-left: 2.16216vh;
+  }
+  .container {
+    width: 64vh;
+  }
+  .button--color {
+    width: 200px;
+    height: 75px;
+  }
 }
 /*# sourceMappingURL=style.css.map */

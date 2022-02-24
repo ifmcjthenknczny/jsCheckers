@@ -2,6 +2,8 @@ $boardSizeVertical: 90vw;
 $boardSizeHorizontal: 80vh;
 $nameSquareSizeVertical: 20 / 740 * $boardSizeVertical;
 $nameSquareSizeHorizontal: 20 / 740 * $boardSizeHorizontal;
+$pieceBorderThickness: clamp(1.5px, $boardSizeHorizontal * 0.001648, 2.5px);
+$secondaryBorderThickness: clamp(1px, $boardSizeHorizontal * 0.0011, 1.5px);
 
 $pieceSize: (2/3) * 100%;
 
@@ -22,28 +24,11 @@ $colorTransitionTime: 0.3s;
 //bordery
 //bg na komórce i inny kolor tekstu
 
+
 //vertical screens
 @media (max-width: 699px) {
     html {
-        font-size: $nameSquareSizeHorizontal / 1.75;
-    }
-
-    .board {
-        width: $boardSizeVertical;
-        height: $boardSizeVertical;
-    }
-
-    .gameInfo {
-        width: $boardSizeVertical;
-        margin-top: 20vh;
-
-        &__whoToMove {
-            margin-left: $nameSquareSizeVertical;
-        }
-    }
-
-    .container {
-        width: 0.9 * $boardSizeVertical;
+        font-size: clamp(10px, $nameSquareSizeVertical, 20px);
     }
 }
 
@@ -52,38 +37,10 @@ $colorTransitionTime: 0.3s;
     html {
         font-size: $nameSquareSizeHorizontal;
     }
-
-    .board {
-        width: $boardSizeHorizontal;
-        height: $boardSizeHorizontal;
-    }
-
-    .gameInfo {
-        width: $boardSizeHorizontal;
-        margin-top: 25vh;
-
-        &__whoToMove {
-            margin-left: $nameSquareSizeHorizontal;
-        }
-    }
-
-    .container {
-        width: 0.8 * $boardSizeHorizontal;
-    }
-
-    .button {
-        width: 150px;
-        height: 50px;
-
-        &--color {
-            width: 30%;
-            height: 10%;
-        }
-    }
 }
 
 html {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: $globalFont;
     // font-size: 20px;
 }
 
@@ -154,9 +111,10 @@ body {
 
     &--reset {
         margin-top: $minipieceSize / 2;
-        border-radius: 8%;
+        border-radius: 10%;
         border: .8px solid black;
         font-weight: 650;
+        font-size: 20px;
 
         &:hover,
         &:active {
@@ -167,11 +125,11 @@ body {
     }
 
     &--color {
-        border: 2px solid black;
+        border: $secondaryBorderThickness solid black;
         font-size: 1.6rem;
+        margin-top: 60px;
         width: 200px;
         height: 75px;
-        margin-top: 60px;
     }
 
     &--white:hover,
@@ -229,7 +187,7 @@ body {
     width: $pieceSize;
     height: $pieceSize;
     border-radius: 50%;
-    border: 2.5px solid;
+    border: $pieceBorderThickness solid;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -254,10 +212,10 @@ body {
 
     &--queenDecoration {
         border-radius: 50%;
-        width: $pieceSize / 2;
-        height: $pieceSize / 2;
+        width: $pieceSize / 1.5;
+        height: $pieceSize / 1.5;
         background-color: mix(darkgrey, black, 80%);
-        border: 1.5px solid;
+        border: $secondaryBorderThickness solid;
     }
 }
 
@@ -265,7 +223,7 @@ body {
     width: $minipieceSize;
     height: $minipieceSize;
     border-radius: 50%;
-    border: 1.5px solid black;
+    border: $secondaryBorderThickness solid black;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -303,7 +261,7 @@ body {
     height: $pieceSize / 2;
     border-radius: 50%;
     background-color: mix(aqua, violet);
-    border: 1px solid black;
+    border: $secondaryBorderThickness solid black;
 }
 
 .gameInfo {
@@ -311,7 +269,6 @@ body {
     flex-direction: row;
     justify-content: end;
     text-transform: uppercase;
-    font-size: 1rem;
     font-weight: 550;
 
     &__turnCounter {
@@ -321,9 +278,12 @@ body {
     }
 
     &__whoToMove {
+        // display: flex;
+        // align-items: center;
         margin-right: auto;
 
         span {
+            // margin-right: 5px;
             font-weight: 700;
             color: black;
             text-shadow: none;
@@ -332,6 +292,85 @@ body {
                 color: white;
                 -webkit-text-stroke: 0.7px black;
             }
+        }
+    }
+}
+
+
+
+@media (max-width: 699px) {
+    .board {
+        width: $boardSizeVertical;
+        height: $boardSizeVertical;
+    }
+
+    .gameInfo {
+        width: $boardSizeVertical;
+        margin-top: 22vh;
+        font-size: 1.4rem;
+
+        &__whoToMove {
+            margin-left: $nameSquareSizeVertical;
+        }
+    }
+
+    .container {
+        width: 0.9 * $boardSizeVertical;
+        margin-top: 35vh;
+    }
+
+    .question {
+        font-size: 3rem;
+    }
+
+    .button {
+        &--color {
+            width: 30vw;
+            height: 6vh;
+        }
+
+        &--white {
+            background-color: white;
+            font-weight: 900;
+            // box-shadow: 0px 0px 40px 9px #808080;
+            font-size: 1.8rem;
+        }
+
+        &--black {
+            background-color: black;
+            font-weight: 900;
+            // box-shadow: 0px 0px 40px 9px #808080;
+            color: white;
+            font-size: 1.8rem;
+        }
+    }
+}
+
+@media (min-width: 700px) {
+
+    .board {
+        width: $boardSizeHorizontal;
+        height: $boardSizeHorizontal;
+    }
+
+    .gameInfo {
+        width: $boardSizeHorizontal;
+        font-size: 1rem;
+        // margin-top: 25vh;
+
+        &__whoToMove {
+            margin-left: $nameSquareSizeHorizontal;
+        }
+    }
+
+    .container {
+        width: 0.8 * $boardSizeHorizontal;
+    }
+
+    .button {
+        &--color {
+            width: 200px;
+            height: 75px;
         }
     }
 }
