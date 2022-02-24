@@ -515,7 +515,10 @@ let onlyQueenMovesWithoutCapture = 0;
 generateTitleWindow();
 
 // TO DO CSS HTML
-//responsywność dla różnych rozdzielczości
+//responsywność:
+//bordery szachowica i miniPiece ustawić lepsze
+//author do prawej
+//szachownica z lekkim opacity
 
 //html description
 //nazwy trochę bardziej BEM
@@ -554,3 +557,4 @@ generateTitleWindow();
 //zamiast clicked piece == this?
 //wrzucić na hosting
 //żeby wyrzucało w jednym typie zmiennej + dodać typy zmiennych?
+//mixin sass

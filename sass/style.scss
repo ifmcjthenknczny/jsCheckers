@@ -2,8 +2,9 @@ $boardSizeVertical: 90vw;
 $boardSizeHorizontal: 80vh;
 $nameSquareSizeVertical: 20 / 740 * $boardSizeVertical;
 $nameSquareSizeHorizontal: 20 / 740 * $boardSizeHorizontal;
-$pieceBorderThickness: clamp(1.5px, $boardSizeHorizontal * 0.001648, 2.5px);
-$secondaryBorderThickness: clamp(1px, $boardSizeHorizontal * 0.0011, 1.5px);
+$pieceBorderThickness: clamp(1.2px, $boardSizeVertical * 0.0017, 2.2px);
+$secondaryBorderThickness: clamp(0.8px, $boardSizeVertical * 0.0012, 1.5px);
+// $thirdBorderThickness: clamp(0.5px, $boardSizeVertical * 0.0007, 0.8px);
 
 $pieceSize: (2/3) * 100%;
 
@@ -14,16 +15,14 @@ Tahoma,
 Geneva,
 Verdana,
 sans-serif;
+$secondaryFont: 'Cousine',
+monospace;
 
-$blackColor: rgba(0, 0, 0, 0.333);
-$whiteColor: rgba(255, 255, 255, 0.666);
-$clickedColor: rgba(255, 0, 0, 0.75);
-$borderColor: darkgray;
+$blackColor: #aaa;
+$whiteColor: #fff;
+$clickedColor: #ea2b2b;
+$borderColor: mix(darkgrey, black, 80%);
 $colorTransitionTime: 0.3s;
-
-//bordery
-//bg na komórce i inny kolor tekstu
-
 
 //vertical screens
 @media (max-width: 699px) {
@@ -50,6 +49,7 @@ body {
     overflow: none;
     justify-content: center;
     flex-flow: column;
+    background-image: url(../img/what-the-hex.png);
 }
 
 .board {
@@ -61,7 +61,7 @@ body {
 }
 
 .grid__square {
-    border: 1px solid $borderColor;
+    border: .8px solid $borderColor;
 
     display: flex;
     align-items: center;
@@ -80,6 +80,7 @@ body {
         text-align: center;
         font-weight: 700;
         font-size: 1rem;
+        font-family: $secondaryFont;
 
         &Col {
             text-transform: uppercase;
@@ -111,8 +112,8 @@ body {
 
     &--reset {
         margin-top: $minipieceSize / 2;
-        border-radius: 10%;
-        border: .8px solid black;
+        border-radius: 12px;
+        border: $secondaryBorderThickness solid black;
         font-weight: 650;
         font-size: 20px;
 
@@ -175,12 +176,15 @@ body {
     font-weight: 650;
     font-size: 2.8rem;
     align-self: center;
+    text-align: center;
+    font-family: $secondaryFont;
 }
 
 .buttonContainer {
     display: flex;
     flex-flow: row;
     justify-content: space-between;
+    font-family: $secondaryFont;
 }
 
 .piece {
@@ -198,6 +202,7 @@ body {
 
         & .piece--queenDecoration {
             border-color: white;
+            background-color: mix(darkgrey, black, 50%);
         }
     }
 
@@ -207,6 +212,7 @@ body {
 
         & .piece--queenDecoration {
             border-color: black;
+            background-color: mix(lightgrey, grey, 70%);
         }
     }
 
@@ -214,7 +220,6 @@ body {
         border-radius: 50%;
         width: $pieceSize / 1.5;
         height: $pieceSize / 1.5;
-        background-color: mix(darkgrey, black, 80%);
         border: $secondaryBorderThickness solid;
     }
 }
@@ -223,7 +228,7 @@ body {
     width: $minipieceSize;
     height: $minipieceSize;
     border-radius: 50%;
-    border: $secondaryBorderThickness solid black;
+    border: .6px solid black;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -290,13 +295,11 @@ body {
 
             &.white {
                 color: white;
-                -webkit-text-stroke: 0.7px black;
+                -webkit-text-stroke: 0.6px black;
             }
         }
     }
 }
-
-
 
 @media (max-width: 699px) {
     .board {
@@ -306,7 +309,7 @@ body {
 
     .gameInfo {
         width: $boardSizeVertical;
-        margin-top: 22vh;
+        margin-top: 15vh;
         font-size: 1.4rem;
 
         &__whoToMove {
@@ -316,7 +319,7 @@ body {
 
     .container {
         width: 0.9 * $boardSizeVertical;
-        margin-top: 35vh;
+        margin-top: 30vh;
     }
 
     .question {
@@ -326,7 +329,7 @@ body {
     .button {
         &--color {
             width: 30vw;
-            height: 6vh;
+            height: 50px;
         }
 
         &--white {

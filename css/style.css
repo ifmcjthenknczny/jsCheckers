@@ -29,6 +29,7 @@ body {
   -webkit-box-direction: normal;
       -ms-flex-flow: column;
           flex-flow: column;
+  background-image: url(../img/what-the-hex.png);
 }
 
 .board {
@@ -43,7 +44,7 @@ body {
 }
 
 .grid__square {
-  border: 1px solid darkgray;
+  border: 0.8px solid #878787;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -56,11 +57,11 @@ body {
 }
 
 .grid__square--black {
-  background-color: rgba(0, 0, 0, 0.333);
+  background-color: #aaa;
 }
 
 .grid__square--white {
-  background-color: rgba(255, 255, 255, 0.666);
+  background-color: #fff;
 }
 
 .grid__square--name {
@@ -68,6 +69,7 @@ body {
   text-align: center;
   font-weight: 700;
   font-size: 1rem;
+  font-family: "Cousine", monospace;
 }
 
 .grid__square--nameCol {
@@ -111,20 +113,20 @@ body {
 
 .button--reset {
   margin-top: 3px;
-  border-radius: 10%;
-  border: .8px solid black;
+  border-radius: 12px;
+  border: clamp(0.8px, 0.108vw, 1.5px) solid black;
   font-weight: 650;
   font-size: 20px;
 }
 
 .button--reset:hover, .button--reset:active {
-  background-color: rgba(255, 0, 0, 0.75);
+  background-color: #ea2b2b;
   color: white;
   font-weight: 900;
 }
 
 .button--color {
-  border: clamp(1px, 0.088vh, 1.5px) solid black;
+  border: clamp(0.8px, 0.108vw, 1.5px) solid black;
   font-size: 1.6rem;
   margin-top: 60px;
   width: 200px;
@@ -186,6 +188,8 @@ body {
   -ms-flex-item-align: center;
       -ms-grid-row-align: center;
       align-self: center;
+  text-align: center;
+  font-family: "Cousine", monospace;
 }
 
 .buttonContainer {
@@ -199,13 +203,14 @@ body {
   -webkit-box-pack: justify;
       -ms-flex-pack: justify;
           justify-content: space-between;
+  font-family: "Cousine", monospace;
 }
 
 .piece {
   width: 66.66667%;
   height: 66.66667%;
   border-radius: 50%;
-  border: clamp(1.5px, 0.13184vh, 2.5px) solid;
+  border: clamp(1.2px, 0.153vw, 2.2px) solid;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -224,6 +229,7 @@ body {
 
 .piece--black .piece--queenDecoration {
   border-color: white;
+  background-color: #555555;
 }
 
 .piece--white {
@@ -233,21 +239,21 @@ body {
 
 .piece--white .piece--queenDecoration {
   border-color: black;
+  background-color: #bababa;
 }
 
 .piece--queenDecoration {
   border-radius: 50%;
   width: 44.44444%;
   height: 44.44444%;
-  background-color: #878787;
-  border: clamp(1px, 0.088vh, 1.5px) solid;
+  border: clamp(0.8px, 0.108vw, 1.5px) solid;
 }
 
 .miniPiece {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  border: clamp(1px, 0.088vh, 1.5px) solid black;
+  border: .6px solid black;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -275,7 +281,7 @@ body {
 .piece:hover .piece--queenDecoration,
 #pieceClicked .piece--queenDecoration,
 .piece:active .piece--queenDecoration {
-  background-color: rgba(153, 0, 0, 0.75);
+  background-color: #9f1010;
   -webkit-transition: 0.3s;
   transition: 0.3s;
 }
@@ -283,7 +289,7 @@ body {
 #pieceClicked,
 .piece:hover,
 .piece:active {
-  background-color: rgba(255, 0, 0, 0.75);
+  background-color: #ea2b2b;
   -webkit-transition: 0.3s;
   transition: 0.3s;
 }
@@ -293,7 +299,7 @@ body {
   height: 33.33333%;
   border-radius: 50%;
   background-color: #77c1f7;
-  border: clamp(1px, 0.088vh, 1.5px) solid black;
+  border: clamp(0.8px, 0.108vw, 1.5px) solid black;
 }
 
 .gameInfo {
@@ -327,7 +333,7 @@ body {
 
 .gameInfo__whoToMove span.white {
   color: white;
-  -webkit-text-stroke: 0.7px black;
+  -webkit-text-stroke: 0.6px black;
 }
 
 @media (max-width: 699px) {
@@ -337,7 +343,7 @@ body {
   }
   .gameInfo {
     width: 90vw;
-    margin-top: 22vh;
+    margin-top: 15vh;
     font-size: 1.4rem;
   }
   .gameInfo__whoToMove {
@@ -345,14 +351,14 @@ body {
   }
   .container {
     width: 81vw;
-    margin-top: 35vh;
+    margin-top: 30vh;
   }
   .question {
     font-size: 3rem;
   }
   .button--color {
     width: 30vw;
-    height: 6vh;
+    height: 50px;
   }
   .button--white {
     background-color: white;
