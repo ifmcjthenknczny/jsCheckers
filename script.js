@@ -95,8 +95,10 @@ function unhighlightPiecesThatCanMove() {
 }
 
 function pieceUnhold() {
-    if (document.querySelector('#pieceClicked')) document.querySelector('#pieceClicked').removeAttribute('id');
-    removeLegalMovesMark();
+    if (chainedCapturePiece === null) {
+        if (document.querySelector('#pieceClicked')) document.querySelector('#pieceClicked').removeAttribute('id');
+        removeLegalMovesMark();
+    }
 }
 
 function removeLegalMovesMark() {
@@ -107,9 +109,13 @@ function removeLegalMovesMark() {
 function movePiece() {
     const clickedPiece = document.querySelector('#pieceClicked');
     // prettier-ignore
+    const isQueen = clickedPiece.classList.contains('piece--queen');
+    // prettier-ignore
     const legalSquare = this.firstElementChild.classList.contains('legalMove');
     if (!!clickedPiece && legalSquare && !isComputerTurn()) {
-        (clickedPiece.classList.contains('piece--queen') && !forcedCapture) ? onlyQueenMovesWithoutCapture++ : onlyQueenMovesWithoutCapture = 0;
+        (isQueen && !forcedCapture) ? onlyQueenMovesWithoutCapture++ : onlyQueenMovesWithoutCapture = 0;
+        queenCaptureForbiddenDirection = (isQueen && forcedCapture) ? findQueenCaptureForbiddenDirection(clickedPiece.parentElement.id, this.id) : [null, null];
+
         if (forcedCapture) removeCapturedPiece(findSquareOfAPieceToCapture(clickedPiece.parentElement.id, this.id));
         this.appendChild(clickedPiece);
         if (forcedCapture && legalCapturesOfPiece(clickedPiece).length > 0) {
@@ -118,11 +124,18 @@ function movePiece() {
             generateLegalMovesMark(legalCapturesOfPiece(clickedPiece));
         } else {
             chainedCapturePiece = null;
+            queenCaptureForbiddenDirection = [null, null];
             if (promotion(clickedPiece)) crownTheQueen(clickedPiece);
             pieceUnhold();
             endTurn();
         }
     }
+}
+
+function findQueenCaptureForbiddenDirection(startSquareName, targetSquareName) {
+    const [startCol, startRow] = startSquareName;
+    const [targetCol, targetRow] = targetSquareName;
+    return [targetCol < startCol, targetRow < startRow];
 }
 
 function findAllLegalMoves() {
@@ -159,26 +172,29 @@ async function computerMove() {
         await sleep(500);
     }
 
-    (pieceToMove.classList.contains('piece--queen') && !forcedCapture) ? onlyQueenMovesWithoutCapture++ : onlyQueenMovesWithoutCapture = 0;
+    //prettier-ignore
+    const isQueen = pieceToMove.classList.contains('piece--queen');
+    (isQueen && !forcedCapture) ? onlyQueenMovesWithoutCapture++ : onlyQueenMovesWithoutCapture = 0;
+    queenCaptureForbiddenDirection = (isQueen && forcedCapture) ? findQueenCaptureForbiddenDirection(pieceToMove.parentElement.id, targetSquare.id) : [null, null];
 
     if (forcedCapture) removeCapturedPiece(findSquareOfAPieceToCapture(pieceToMove.parentElement.id, targetSquare.id));
+
     targetSquare.appendChild(pieceToMove);
     if (forcedCapture && legalCapturesOfPiece(pieceToMove).length > 0) {
         chainedCapturePiece = pieceToMove;
         computerMove();
     } else {
         if (promotion(pieceToMove)) crownTheQueen(pieceToMove);
+        queenCaptureForbiddenDirection = [null, null];
+        chainedCapturePiece = null;
         endTurn();
     }
-    chainedCapturePiece = null;
 }
 
 function endTurn() {
     lastMoveBlack = !lastMoveBlack;
-    if (endOfGame()) {
-        congratsToWinner();
-        // disableMoves();
-    } else {
+    if (endOfGame()) congratsToWinner();
+    else {
         changeGameInfo();
         if (isComputerTurn()) computerMove();
     }
@@ -245,11 +261,14 @@ function generateButtons() {
     resetButton.classList.add('button', 'button--reset');
     resetButton.innerText = 'restart';
     resetButton.addEventListener("click", () => {
-        // const main = 
         document.body.innerHTML = '';
         document.body.appendChild(document.createElement('main'));
         lastMoveBlack = true;
         turn = 1;
+        forcedCapture = false;
+        onlyQueenMovesWithoutCapture = 0;
+        chainedCapturePiece = null;
+        queenCaptureForbiddenDirection = [null, null];
         generateFirstQuestion();
     });
     document.body.appendChild(resetButton);
@@ -318,7 +337,7 @@ function legalCapturesOfPiece(piece) {
     } else {
         for (let colsUp of [true, false]) {
             for (let rowsUp of [true, false]) {
-                capturesPossible.push(...diagonalQueenCaptures(pieceSquare, colsUp, rowsUp));
+                if (!(colsUp === queenCaptureForbiddenDirection[0] && rowsUp === queenCaptureForbiddenDirection[1])) capturesPossible.push(...diagonalQueenCaptures(pieceSquare, colsUp, rowsUp));
             }
         }
     }
@@ -394,7 +413,7 @@ function pickAMove(legalMovesDict) {
     const pieceToMove = piecesThatCanMove[Math.floor(Math.random() * piecesThatCanMove.length)];
     const possibleMoves = legalMovesDict[pieceToMove];
     const targetSquare = possibleMoves.length === 1 ? possibleMoves[0].id : possibleMoves[Math.floor(Math.random() * possibleMoves.length)].id;
-    //outputs String[originalPieceSquare, targetPieceSquare]
+
     return [pieceToMove, targetSquare]
 }
 
@@ -428,7 +447,6 @@ function createDiagonalIterable(originalIndex, targetIndex) {
 function findSquareOfAPieceToCapture(originalSquare, targetSquare) {
     const [originalCol, originalRow] = originalSquare;
     const [targetCol, targetRow] = targetSquare;
-    // return document.querySelector(`#${cols[(cols.indexOf(originalCol)+cols.indexOf(targetCol))/2]}${(+originalRow+(+(targetRow)))/2}`);
     const rowIterable = createDiagonalIterable(rows.indexOf(+originalRow), rows.indexOf(+targetRow));
     const colIterable = createDiagonalIterable(cols.indexOf(originalCol), cols.indexOf(targetCol));
     const classToCapture = lastMoveBlack ? 'piece--black' : 'piece--white';
@@ -548,13 +566,13 @@ let lastMoveBlack = true;
 let playWhite = true;
 let onlyQueenMovesWithoutCapture = 0;
 let chainedCapturePiece = null;
+let queenCaptureForbiddenDirection = [null, null];
 generateTitleWindow();
 
 // TO DO CSS HTML
 //responsywność:
-//bordery szachowica i miniPiece ustawić lepsze
+//bordery piece i szachowica dopracować i miniPiece ustawić lepsze
 //author do prawej
-//szachownica z lekkim opacity
 //vmin vmax
 
 //html description
@@ -570,11 +588,10 @@ generateTitleWindow();
 // TO DO LOGIKA JS
 //disable po końcu gry też na hover
 //tylko najlepsze bicia
-//bardziej randomowe ruchy, żeby wybierało ze wszystkich, a nie najpierw pionka potem ruch
-//klasa justMoved
+//bardziej randomowe ruchy, żeby wybierało ze wszystkich, a nie najpierw pionka potem ruch + żeby damka nie ustawiała się w normalnym ruchu nie na cdef3456?
 //czy remis jest gicior
 // damka chained bicie po jednej przekątnej (bez wracania - beenThere class)
-// przycisk odwróć szachowicę, pokaż możliwe ruchy? i pokaż ostatni ruch
+// przycisk odwróć szachowicę, pokaż możliwe ruchy? i pokaż ostatni ruch -- klasa justMoved
 
 //alert o biciu
 //wybór koloru pionków w dowolnym momencie?
@@ -594,6 +611,5 @@ generateTitleWindow();
 //readme github
 //funkcje po kolei umiejscowic w kodzie
 //zamiast clicked piece == this?
-//wrzucić na hosting
-//żeby wyrzucało w jednym typie zmiennej + dodać typy zmiennych?
+//upewnić się że wyrzuca w jednym typie zmiennej (obiekt) + dodać typy zmiennych?
 //mixin sass
