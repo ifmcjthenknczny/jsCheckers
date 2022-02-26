@@ -57,11 +57,11 @@ body {
 }
 
 .grid__square--black {
-  background-color: #aaa;
+  background-color: rgba(170, 170, 170, 0.7);
 }
 
 .grid__square--white {
-  background-color: #fff;
+  background-color: rgba(255, 255, 255, 0.7);
 }
 
 .grid__square--name {
@@ -114,7 +114,7 @@ body {
 .button--reset {
   margin-top: 3px;
   border-radius: 12px;
-  border: clamp(0.8px, 0.108vw, 1.5px) solid black;
+  border: clamp(0.8px, 0.102vmax, 1.5px) solid black;
   font-weight: 650;
   font-size: 20px;
 }
@@ -126,7 +126,7 @@ body {
 }
 
 .button--color {
-  border: clamp(0.8px, 0.108vw, 1.5px) solid black;
+  border: clamp(0.8px, 0.102vmax, 1.5px) solid black;
   font-size: 1.6rem;
   margin-top: 60px;
   width: 200px;
@@ -210,7 +210,7 @@ body {
   width: 66.66667%;
   height: 66.66667%;
   border-radius: 50%;
-  border: clamp(1.2px, 0.153vw, 2.2px) solid;
+  border: clamp(1.2px, 0.1445vmax, 2.2px) solid;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -232,6 +232,14 @@ body {
   background-color: #555555;
 }
 
+.piece--black.piece--canMove {
+  background-color: #1795f1;
+}
+
+.piece--black .piece--canMove {
+  background-color: #77c1f7;
+}
+
 .piece--white {
   background-color: white;
   border-color: black;
@@ -242,11 +250,19 @@ body {
   background-color: #bababa;
 }
 
+.piece--white.piece--canMove {
+  background-color: #77c1f7;
+}
+
+.piece--white .piece--canMove {
+  background-color: #1795f1;
+}
+
 .piece--queenDecoration {
   border-radius: 50%;
   width: 44.44444%;
   height: 44.44444%;
-  border: clamp(0.8px, 0.108vw, 1.5px) solid;
+  border: clamp(0.8px, 0.102vmax, 1.5px) solid;
 }
 
 .miniPiece {
@@ -299,7 +315,7 @@ body {
   height: 33.33333%;
   border-radius: 50%;
   background-color: #77c1f7;
-  border: clamp(0.8px, 0.108vw, 1.5px) solid black;
+  border: clamp(0.8px, 0.102vmax, 1.5px) solid black;
 }
 
 .gameInfo {

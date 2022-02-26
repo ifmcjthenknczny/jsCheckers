@@ -64,12 +64,34 @@ function generateStartPosition() {
 }
 
 function pieceHold() {
-    if (!isComputerTurn() && !endOfGame()) {
+    if (!isComputerTurn() && !endOfGame() && !chainedCapturePiece) {
+        unhighlightPiecesThatCanMove();
         pieceUnhold();
-        this.setAttribute('id', 'pieceClicked');
-        if (isThereACapturePossibility()) generateLegalMovesMark(legalCapturesOfPiece(this));
-        else generateLegalMovesMark(legalNormalMovesOfPiece(this));
+        if ((legalNormalMovesOfPiece(this).length > 0 && !isThereACapturePossibility()) || (isThereACapturePossibility() && legalCapturesOfPiece(this).length > 0)) {
+            this.setAttribute('id', 'pieceClicked');
+            if (isThereACapturePossibility()) generateLegalMovesMark(legalCapturesOfPiece(this));
+            else generateLegalMovesMark(legalNormalMovesOfPiece(this));
+        } else {
+            highlightPiecesThatCanMove(this);
+        }
     }
+}
+
+function highlightPiecesThatCanMove(clickedPiece) {
+    const isPieceWhite = clickedPiece.classList.contains('piece--white');
+    const selector = isPieceWhite ? '.piece--white' : '.piece--black';
+    const allColorPieces = document.querySelectorAll(selector);
+
+    for (let piece of allColorPieces)
+        if ((legalNormalMovesOfPiece(piece).length > 0 && !isThereACapturePossibility()) || (isThereACapturePossibility() && legalCapturesOfPiece(piece).length > 0)) {
+            piece.classList.add('piece--canMove');
+            if (piece.firstChild) piece.firstChild.classList.add('piece--canMove');
+        }
+}
+
+function unhighlightPiecesThatCanMove() {
+    const piecesToRemoveClass = document.querySelectorAll('.piece--canMove');
+    for (let piece of piecesToRemoveClass) piece.classList.remove('piece--canMove');
 }
 
 function pieceUnhold() {
@@ -92,6 +114,7 @@ function movePiece() {
         this.appendChild(clickedPiece);
         if (forcedCapture && legalCapturesOfPiece(clickedPiece).length > 0) {
             removeLegalMovesMark();
+            chainedCapturePiece = clickedPiece;
             generateLegalMovesMark(legalCapturesOfPiece(clickedPiece));
         } else {
             if (promotion(clickedPiece)) crownTheQueen(clickedPiece);
@@ -99,6 +122,7 @@ function movePiece() {
             endTurn();
         }
     }
+    chainedCapturePiece = null;
 }
 
 function findAllLegalMoves() {
@@ -121,9 +145,17 @@ function findAllLegalMoves() {
 }
 
 async function computerMove() {
-    const [nameOfSquareOfPieceToMove, nameOfTargetSquare] = pickAMove(findAllLegalMoves());
-    const pieceToMove = document.querySelector(`#${nameOfSquareOfPieceToMove}`).firstElementChild;
-    const targetSquare = document.querySelector(`#${nameOfTargetSquare}`);
+    let pieceToMove, targetSquare;
+
+    if (!chainedCapturePiece) {
+        const [nameOfSquareOfPieceToMove, nameOfTargetSquare] = pickAMove(findAllLegalMoves());
+        pieceToMove = document.querySelector(`#${nameOfSquareOfPieceToMove}`).firstElementChild;
+        targetSquare = document.querySelector(`#${nameOfTargetSquare}`);
+    } else {
+        pieceToMove = chainedCapturePiece;
+        const legalCaptures = legalCapturesOfPiece(pieceToMove);
+        targetSquare = legalCaptures[Math.floor(Math.random() * legalCaptures.length)];
+    }
 
     (pieceToMove.classList.contains('piece--queen') && !forcedCapture) ? onlyQueenMovesWithoutCapture++ : onlyQueenMovesWithoutCapture = 0;
 
@@ -131,18 +163,21 @@ async function computerMove() {
 
     if (forcedCapture) removeCapturedPiece(findSquareOfAPieceToCapture(pieceToMove.parentElement.id, targetSquare.id));
     targetSquare.appendChild(pieceToMove);
-    if (forcedCapture && legalCapturesOfPiece(pieceToMove).length > 0) computerMove();
-    else {
+    if (forcedCapture && legalCapturesOfPiece(pieceToMove).length > 0) {
+        chainedCapturePiece = pieceToMove;
+        computerMove();
+    } else {
         if (promotion(pieceToMove)) crownTheQueen(pieceToMove);
         endTurn();
     }
+    chainedCapturePiece = null;
 }
 
 function endTurn() {
     lastMoveBlack = !lastMoveBlack;
     if (endOfGame()) {
         congratsToWinner();
-        disableMoves();
+        // disableMoves();
     } else {
         changeGameInfo();
         if (isComputerTurn()) computerMove();
@@ -512,6 +547,7 @@ let forcedCapture = false;
 let lastMoveBlack = true;
 let playWhite = true;
 let onlyQueenMovesWithoutCapture = 0;
+let chainedCapturePiece = null;
 generateTitleWindow();
 
 // TO DO CSS HTML
@@ -519,6 +555,7 @@ generateTitleWindow();
 //bordery szachowica i miniPiece ustawić lepsze
 //author do prawej
 //szachownica z lekkim opacity
+//vmin vmax
 
 //html description
 //nazwy trochę bardziej BEM
@@ -534,8 +571,11 @@ generateTitleWindow();
 //disable po końcu gry też na hover
 //tylko najlepsze bicia
 //bardziej randomowe ruchy, żeby wybierało ze wszystkich, a nie najpierw pionka potem ruch
-//klasa justMoved - mix niebieskiego i koloru bierki dla pionków które właśnie się ruszyły
+//klasa justMoved
 //czy remis jest gicior
+// wymóg bicia podwójnego tym samym pionkiem
+// damka chained bicie po jednej przekątnej (bez wracania)
+// przycisk odwróć szachowicę, pokaż możliwe ruchy i pokaż ostatni ruch
 
 //alert o biciu
 //wybór koloru pionków w dowolnym momencie?
