@@ -21,7 +21,6 @@ body {
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
-  overflow: none;
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
@@ -33,7 +32,6 @@ body {
 }
 
 .board {
-  overflow: none;
   display: -ms-grid;
   display: grid;
   -ms-grid-columns: 0.2fr (1fr)[8];
@@ -65,7 +63,6 @@ body {
 }
 
 .grid__square--name {
-  padding: auto;
   text-align: center;
   font-weight: 700;
   font-size: 1rem;
@@ -233,11 +230,11 @@ body {
 }
 
 .piece--black.piece--canMove {
-  background-color: #1795f1;
+  background-color: #47abf4;
 }
 
 .piece--black .piece--canMove {
-  background-color: #77c1f7;
+  background-color: #47abf4;
 }
 
 .piece--white {

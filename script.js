@@ -117,12 +117,12 @@ function movePiece() {
             chainedCapturePiece = clickedPiece;
             generateLegalMovesMark(legalCapturesOfPiece(clickedPiece));
         } else {
+            chainedCapturePiece = null;
             if (promotion(clickedPiece)) crownTheQueen(clickedPiece);
             pieceUnhold();
             endTurn();
         }
     }
-    chainedCapturePiece = null;
 }
 
 function findAllLegalMoves() {
@@ -151,15 +151,15 @@ async function computerMove() {
         const [nameOfSquareOfPieceToMove, nameOfTargetSquare] = pickAMove(findAllLegalMoves());
         pieceToMove = document.querySelector(`#${nameOfSquareOfPieceToMove}`).firstElementChild;
         targetSquare = document.querySelector(`#${nameOfTargetSquare}`);
+        await sleep(800);
     } else {
         pieceToMove = chainedCapturePiece;
         const legalCaptures = legalCapturesOfPiece(pieceToMove);
         targetSquare = legalCaptures[Math.floor(Math.random() * legalCaptures.length)];
+        await sleep(500);
     }
 
     (pieceToMove.classList.contains('piece--queen') && !forcedCapture) ? onlyQueenMovesWithoutCapture++ : onlyQueenMovesWithoutCapture = 0;
-
-    await sleep(800);
 
     if (forcedCapture) removeCapturedPiece(findSquareOfAPieceToCapture(pieceToMove.parentElement.id, targetSquare.id));
     targetSquare.appendChild(pieceToMove);
@@ -493,7 +493,7 @@ async function generateTitleWindow() {
     main.appendChild(container);
     document.body.appendChild(main);
 
-    await sleep(4000);
+    await sleep(3500);
     container.remove();
     generateFirstQuestion();
 }
@@ -573,9 +573,8 @@ generateTitleWindow();
 //bardziej randomowe ruchy, żeby wybierało ze wszystkich, a nie najpierw pionka potem ruch
 //klasa justMoved
 //czy remis jest gicior
-// wymóg bicia podwójnego tym samym pionkiem
-// damka chained bicie po jednej przekątnej (bez wracania)
-// przycisk odwróć szachowicę, pokaż możliwe ruchy i pokaż ostatni ruch
+// damka chained bicie po jednej przekątnej (bez wracania - beenThere class)
+// przycisk odwróć szachowicę, pokaż możliwe ruchy? i pokaż ostatni ruch
 
 //alert o biciu
 //wybór koloru pionków w dowolnym momencie?

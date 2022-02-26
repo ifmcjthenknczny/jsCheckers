@@ -46,14 +46,14 @@ html {
 body {
     display: flex;
     align-items: center;
-    overflow: none;
+    // overflow: none;
     justify-content: center;
     flex-flow: column;
     background-image: url(../img/what-the-hex.png);
 }
 
 .board {
-    overflow: none;
+    // overflow: none;
     display: grid;
     grid-template-columns: 0.2fr repeat(8, 1fr);
     grid-template-rows: repeat(8, 1fr) 0.2fr;
@@ -76,7 +76,7 @@ body {
     }
 
     &--name {
-        padding: auto;
+        // padding: auto;
         text-align: center;
         font-weight: 700;
         font-size: 1rem;
@@ -206,11 +206,12 @@ body {
         }
 
         &.piece--canMove {
-            background-color: darken(mix(aqua, violet), 20%);
+            background-color: darken(mix(aqua, violet),10%);
+
         }
 
         & .piece--canMove {
-            background-color: mix(aqua, violet);
+            background-color: darken(mix(aqua, violet),10%);
         }
     }
 
