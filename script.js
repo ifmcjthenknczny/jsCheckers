@@ -510,8 +510,10 @@ async function generateTitleWindow() {
     container.appendChild(author);
     main.appendChild(container);
     document.body.appendChild(main);
+    fadeIn('.container',400);
 
     await sleep(3500);
+    // fade('.container',5000000);
     container.remove();
     generateFirstQuestion();
 }
@@ -533,11 +535,13 @@ function generateFirstQuestion() {
     buttonBlack.innerText = 'black';
     buttonWhite.addEventListener('click', () => {
         playWhite = true;
+        // fade('.container',800);
         main.innerHTML = '';
         startGame();
     })
     buttonBlack.addEventListener('click', () => {
         playWhite = false;
+        // fade('.container',800);
         main.innerHTML = '';
         startGame();
     })
@@ -547,6 +551,23 @@ function generateFirstQuestion() {
     buttons.appendChild(buttonBlack);
     container.appendChild(buttons);
     main.appendChild(container);
+    fadeIn('.container',800);
+}
+
+async function fadeIn(elementSelector, time) {
+    let opacity = 0;
+    const element = document.querySelector(elementSelector);
+    element.style.opacity = opacity;
+
+    const opacityTarget = 1;
+    const deltaOpacity = 0.05;
+
+    while (opacity !== opacityTarget) {
+        await sleep(time * deltaOpacity);
+        opacity = +(window.getComputedStyle(element).getPropertyValue("opacity"))
+        opacity = opacity +deltaOpacity;
+        element.style.opacity = opacity;
+    }
 }
 
 function startGame() {
@@ -555,6 +576,7 @@ function startGame() {
     generateButtons();
     generateGameInfo();
     generateStartPosition();
+    fadeIn('body',200);
     if (!playWhite) computerMove();
 }
 
@@ -613,3 +635,5 @@ generateTitleWindow();
 //zamiast clicked piece == this?
 //upewnić się że wyrzuca w jednym typie zmiennej (obiekt) + dodać typy zmiennych?
 //mixin sass
+//nara zmienne globalne
+//może da radę bez @media

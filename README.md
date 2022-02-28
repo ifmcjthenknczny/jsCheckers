@@ -1,5 +1,5 @@
 # jsCheckers
-> Simple responsive webpage, where you can play checkers with computer opponent.
+> Simple responsive webpage, where you can play checkers with computer opponent. Available at https://ifmcjthenknczny.github.io/jsCheckers/.
 
 ## Table of contents
 * [General info](#general-info)
@@ -39,8 +39,8 @@ No setup needed. Just make sure you don't use Internet Explorer. For Android, Go
 * Display of possible moves of given piece.
 
 * Responsive for mobile and laptop (breakpoint: 700px)
-* Captured pieces go to separate, visible area.
-* Turn counter and message whose turn is it.
+* Captured pieces go to separate, visible area - "graveyard".
+* Turn counter and displaying whose turn is it.
 * Game reset button.
 
 * Board and surroundings fully generated from scratch with use of Javascript.
