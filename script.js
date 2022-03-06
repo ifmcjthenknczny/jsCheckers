@@ -17,7 +17,7 @@ function generateBoard() {
     for (let rowName of rowOrder) {
         whiteSquare = !whiteSquare;
         const squareWithName = document.createElement('div');
-        squareWithName.classList.add('grid__square--nameRow', 'grid__square--name');
+        squareWithName.classList.add('grid__square--name-row', 'grid__square--name');
         squareWithName.innerText = rowName;
         grid.append(squareWithName);
         for (let colName of colOrder) {
@@ -30,7 +30,7 @@ function generateBoard() {
                 square.addEventListener('click', pieceUnhold);
             } else {
                 square.classList.add('grid__square--black', 'grid__square--blackClicked');
-                square.addEventListener('click', movePiece);
+                square.addEventListener('click', makeAMove);
             }
             whiteSquare = !whiteSquare;
             grid.appendChild(square);
@@ -39,7 +39,7 @@ function generateBoard() {
     grid.append(document.createElement('div'));
     for (let colName of colOrder) {
         const squareWithName = document.createElement('div');
-        squareWithName.classList.add('grid__square--nameCol', 'grid__square--name');
+        squareWithName.classList.add('grid__square--name-col', 'grid__square--name');
         squareWithName.innerText = colName;
         grid.append(squareWithName);
     }
@@ -54,6 +54,7 @@ function generateStartPosition() {
     for (let i = 0; i < blackSquares.length; i++) {
         const piece = document.createElement('div');
         piece.classList.add('piece');
+        piece.classList.add('piece-hover');
         if (i < 3 * 4) piece.classList.add(order[0]);
         else if (i >= 5 * 4) {
             piece.classList.add(order[1]);
@@ -68,7 +69,7 @@ function pieceHold() {
         unhighlightPiecesThatCanMove();
         pieceUnhold();
         if ((legalNormalMovesOfPiece(this).length > 0 && !isThereACapturePossibility()) || (isThereACapturePossibility() && legalCapturesOfPiece(this).length > 0)) {
-            this.setAttribute('id', 'pieceClicked');
+            this.setAttribute('id', 'piece-clicked');
             if (isThereACapturePossibility()) generateLegalMovesMark(legalCapturesOfPiece(this));
             else generateLegalMovesMark(legalNormalMovesOfPiece(this));
         } else {
@@ -84,40 +85,40 @@ function highlightPiecesThatCanMove(clickedPiece) {
 
     for (let piece of allColorPieces)
         if ((legalNormalMovesOfPiece(piece).length > 0 && !isThereACapturePossibility()) || (isThereACapturePossibility() && legalCapturesOfPiece(piece).length > 0)) {
-            piece.classList.add('piece--canMove');
-            if (piece.firstChild) piece.firstChild.classList.add('piece--canMove');
+            piece.classList.add('piece--can-move');
+            if (piece.firstChild) piece.firstChild.classList.add('piece--can-move');
         }
 }
 
 function unhighlightPiecesThatCanMove() {
-    const piecesToRemoveClass = document.querySelectorAll('.piece--canMove');
-    for (let piece of piecesToRemoveClass) piece.classList.remove('piece--canMove');
+    const piecesToRemoveClass = document.querySelectorAll('.piece--can-move');
+    for (let piece of piecesToRemoveClass) piece.classList.remove('piece--can-move');
 }
 
 function pieceUnhold() {
     if (chainedCapturePiece === null) {
-        if (document.querySelector('#pieceClicked')) document.querySelector('#pieceClicked').removeAttribute('id');
+        if (document.querySelector('#piece-clicked')) document.querySelector('#piece-clicked').removeAttribute('id');
         removeLegalMovesMark();
     }
 }
 
 function removeLegalMovesMark() {
-    if (document.querySelectorAll('.legalMove'))
-        for (let legalMoveMark of document.querySelectorAll('.legalMove')) legalMoveMark.remove();
+    if (document.querySelectorAll('.legal-move'))
+        for (let legalMoveMark of document.querySelectorAll('.legal-move')) legalMoveMark.remove();
 }
 
-function movePiece() {
-    const clickedPiece = document.querySelector('#pieceClicked');
+function makeAMove() {
+    const clickedPiece = document.querySelector('#piece-clicked');
     // prettier-ignore
     const isQueen = clickedPiece.classList.contains('piece--queen');
     // prettier-ignore
-    const legalSquare = this.firstElementChild.classList.contains('legalMove');
+    const legalSquare = this.firstElementChild.classList.contains('legal-move');
     if (!!clickedPiece && legalSquare && !isComputerTurn()) {
         (isQueen && !forcedCapture) ? onlyQueenMovesWithoutCapture++ : onlyQueenMovesWithoutCapture = 0;
         queenCaptureForbiddenDirection = (isQueen && forcedCapture) ? findQueenCaptureForbiddenDirection(clickedPiece.parentElement.id, this.id) : [null, null];
 
         if (forcedCapture) removeCapturedPiece(findSquareOfAPieceToCapture(clickedPiece.parentElement.id, this.id));
-        this.appendChild(clickedPiece);
+        movePiece(clickedPiece.parentElement, this, moveAnimationDurationMs);
         if (forcedCapture && legalCapturesOfPiece(clickedPiece).length > 0) {
             removeLegalMovesMark();
             chainedCapturePiece = clickedPiece;
@@ -130,6 +131,36 @@ function movePiece() {
             endTurn();
         }
     }
+}
+
+async function movePiece(startSquare, targetSquare, transitionTimeMs) {
+    const clickedPiece = startSquare.firstChild;
+    const [startCol, startRow] = startSquare.id;
+    const [targetCol, targetRow] = targetSquare.id;
+    const [startColIndex, targetColIndex] = [startCol, targetCol].map(x => cols.indexOf(x));
+    const [startRowIndex, targetRowIndex] = [startRow, targetRow].map(x => +x - 1);
+    const squareWidth = parseInt(window.getComputedStyle(document.querySelector('.grid__square')).width, 10);
+    const transX = (targetColIndex - startColIndex) * squareWidth;
+    const transY = (startRowIndex - targetRowIndex) * squareWidth;
+    // const time = window.getComputedStyle(document.querySelector('.piece')).transition.split(' ')[1]
+    const {
+        x: currX,
+        y: currY,
+        width,
+    } = clickedPiece.getBoundingClientRect();
+    const size = width - 2 * parseInt(((window.getComputedStyle(clickedPiece).border).split(' '))[0], 10);
+    clickedPiece.style.position = 'fixed';
+    clickedPiece.style.width = size + 'px';
+    clickedPiece.style.height = size + 'px';
+    clickedPiece.style.transition = `translate ${transitionTimeMs}ms, transform ${transitionTimeMs}ms`;
+    clickedPiece.style.transform = `translate(${transX}px, ${transY}px)`;
+
+    await sleep(transitionTimeMs);
+
+    clickedPiece.style.transform = '';
+    clickedPiece.style.position = '';
+
+    targetSquare.appendChild(clickedPiece);
 }
 
 function findQueenCaptureForbiddenDirection(startSquareName, targetSquareName) {
@@ -157,19 +188,19 @@ function findAllLegalMoves() {
     return legalMoves
 }
 
-async function computerMove() {
-    let pieceToMove, targetSquare;
+function computerMove() {
+    let pieceToMove, targetSquare, movementDuration;
 
     if (!chainedCapturePiece) {
         const [nameOfSquareOfPieceToMove, nameOfTargetSquare] = pickAMove(findAllLegalMoves());
         pieceToMove = document.querySelector(`#${nameOfSquareOfPieceToMove}`).firstElementChild;
         targetSquare = document.querySelector(`#${nameOfTargetSquare}`);
-        await sleep(800);
+        movementDuration = 800;
     } else {
         pieceToMove = chainedCapturePiece;
         const legalCaptures = legalCapturesOfPiece(pieceToMove);
         targetSquare = legalCaptures[Math.floor(Math.random() * legalCaptures.length)];
-        await sleep(500);
+        movementDuration = 500;
     }
 
     //prettier-ignore
@@ -179,7 +210,7 @@ async function computerMove() {
 
     if (forcedCapture) removeCapturedPiece(findSquareOfAPieceToCapture(pieceToMove.parentElement.id, targetSquare.id));
 
-    targetSquare.appendChild(pieceToMove);
+    movePiece(pieceToMove.parentElement, targetSquare, movementDuration);
     if (forcedCapture && legalCapturesOfPiece(pieceToMove).length > 0) {
         chainedCapturePiece = pieceToMove;
         computerMove();
@@ -193,10 +224,20 @@ async function computerMove() {
 
 function endTurn() {
     lastMoveBlack = !lastMoveBlack;
-    if (endOfGame()) congratsToWinner();
-    else {
+    if (endOfGame()) {
+        congratsToWinner();
+        disableHover();
+    } else {
         changeGameInfo();
         if (isComputerTurn()) computerMove();
+    }
+}
+
+function disableHover() {
+    const allPieces = [...document.querySelectorAll('.piece-hover')];
+    for (piece of allPieces) {
+        piece.classList.remove('piece-hover');
+        // piece.classList.add('piece--won');
     }
 }
 
@@ -208,12 +249,12 @@ function isComputerTurn() {
 function crownTheQueen(piece) {
     piece.classList.add("piece--queen");
     const queenDecoration = document.createElement('div');
-    queenDecoration.classList.add("piece--queenDecoration");
+    queenDecoration.classList.add("piece--queen-decoration");
     piece.appendChild(queenDecoration);
 }
 
 function congratsToWinner() {
-    const whoToMove = document.querySelector(".gameInfo__whoToMove");
+    const whoToMove = document.querySelector(".game-info__who-to-move");
     if (onlyQueenMovesWithoutCapture >= 30) {
         whoToMove.innerHTML = 'It is a <span>Draw</span>!'
     } else if (lastMoveBlack) {
@@ -224,11 +265,11 @@ function congratsToWinner() {
 }
 
 function changeGameInfo() {
-    const whoToMove = document.querySelector('.gameInfo__whoToMove span');
+    const whoToMove = document.querySelector('.game-info__who-to-move span');
     whoToMove.classList.toggle('white');
 
     if (lastMoveBlack) {
-        document.querySelector('.gameInfo__turnCounter span').innerText = ++turn;
+        document.querySelector('.game-info__turn-counter span').innerText = ++turn;
         whoToMove.innerText = 'White';
     } else {
         whoToMove.innerText = 'Black';
@@ -240,10 +281,10 @@ function removeCapturedPiece(square) {
     square.firstChild.remove();
 
     const pieceMini = document.createElement('div');
-    if (isQueen) pieceMini.classList.add('miniPiece--queen');
-    else lastMoveBlack ? pieceMini.classList.add('miniPiece--black') : pieceMini.classList.add('miniPiece--white');
-    pieceMini.classList.add('miniPiece')
-    const targetGraveyard = ((!lastMoveBlack && playWhite) || lastMoveBlack && !playWhite) ? '.capturedPieces--top' : '.capturedPieces--bottom';
+    if (isQueen) pieceMini.classList.add('mini-piece--queen');
+    else lastMoveBlack ? pieceMini.classList.add('mini-piece--black') : pieceMini.classList.add('mini-piece--white');
+    pieceMini.classList.add('mini-piece')
+    const targetGraveyard = ((!lastMoveBlack && playWhite) || lastMoveBlack && !playWhite) ? '.captured-pieces--top' : '.captured-pieces--bottom';
     document.querySelector(targetGraveyard).appendChild(pieceMini);
 }
 
@@ -465,7 +506,7 @@ function findSquareOfAPieceToCapture(originalSquare, targetSquare) {
 function generateLegalMovesMark(legalMovesList) {
     for (let legalMoveSquare of legalMovesList) {
         const legalMoveMark = document.createElement('div');
-        legalMoveMark.classList.add('legalMove');
+        legalMoveMark.classList.add('legal-move');
         legalMoveSquare.appendChild(legalMoveMark);
     }
 }
@@ -473,9 +514,9 @@ function generateLegalMovesMark(legalMovesList) {
 function generateGraveyards() {
     const graveyardTop = document.createElement('section');
     const graveyardBottom = document.createElement('section');
-    for (let graveyard of [graveyardTop, graveyardBottom]) graveyard.classList.add('capturedPieces');
-    graveyardTop.classList.add('capturedPieces--top');
-    graveyardBottom.classList.add('capturedPieces--bottom');
+    for (let graveyard of [graveyardTop, graveyardBottom]) graveyard.classList.add('captured-pieces');
+    graveyardTop.classList.add('captured-pieces--top');
+    graveyardBottom.classList.add('captured-pieces--bottom');
     const main = document.querySelector('main');
     document.body.insertBefore(graveyardTop, main);
     document.body.insertBefore(graveyardBottom, main.nextSibling);
@@ -483,11 +524,11 @@ function generateGraveyards() {
 
 function generateGameInfo() {
     const gameInfo = document.createElement('section');
-    gameInfo.className = 'gameInfo';
+    gameInfo.className = 'game-info';
     const whoToMove = document.createElement('section');
-    whoToMove.className = 'gameInfo__whoToMove';
+    whoToMove.className = 'game-info__who-to-move';
     const turnCounter = document.createElement('section');
-    turnCounter.className = 'gameInfo__turnCounter';
+    turnCounter.className = 'game-info__turn-counter';
 
     whoToMove.innerHTML = '<span class="white">White</span> to move';
     turnCounter.innerHTML = 'Turn: <span>1</span>';
@@ -501,7 +542,7 @@ async function generateTitleWindow() {
     const container = document.createElement('div');
     container.classList.add('container');
     const gameTitle = document.createElement('section');
-    gameTitle.classList.add('gameTitle');
+    gameTitle.classList.add('game-title');
     gameTitle.innerText = 'Warcaby';
     const author = document.createElement('section');
     author.classList.add('author');
@@ -510,7 +551,7 @@ async function generateTitleWindow() {
     container.appendChild(author);
     main.appendChild(container);
     document.body.appendChild(main);
-    fadeIn('.container',400);
+    fadeIn('.container', 300);
 
     await sleep(3500);
     // fade('.container',5000000);
@@ -526,7 +567,7 @@ function generateFirstQuestion() {
     question.classList.add("question");
     question.innerText = 'choose your color';
     const buttons = document.createElement('section');
-    buttons.classList.add('buttonContainer');
+    buttons.classList.add('button-container');
     const buttonWhite = document.createElement('button');
     buttonWhite.classList.add('button--white', 'button', 'button--color');
     buttonWhite.innerText = 'white';
@@ -550,24 +591,26 @@ function generateFirstQuestion() {
     buttons.appendChild(buttonWhite);
     buttons.appendChild(buttonBlack);
     container.appendChild(buttons);
+    // container.setAttribute('opacity',0);
     main.appendChild(container);
-    fadeIn('.container',800);
+    // container.fadeIn("fast")
+    fadeIn('.container', 800);
 }
 
 async function fadeIn(elementSelector, time) {
     let opacity = 0;
     const element = document.querySelector(elementSelector);
     element.style.opacity = opacity;
-
     const opacityTarget = 1;
-    const deltaOpacity = 0.05;
-
+    const deltaOpacity = 0.04;
+    // console.time();
     while (opacity !== opacityTarget) {
         await sleep(time * deltaOpacity);
         opacity = +(window.getComputedStyle(element).getPropertyValue("opacity"))
-        opacity = opacity +deltaOpacity;
+        opacity = opacity + deltaOpacity;
         element.style.opacity = opacity;
     }
+    // console.timeEnd();
 }
 
 function startGame() {
@@ -576,7 +619,7 @@ function startGame() {
     generateButtons();
     generateGameInfo();
     generateStartPosition();
-    fadeIn('body',200);
+    fadeIn('body', 200);
     if (!playWhite) computerMove();
 }
 
@@ -589,30 +632,29 @@ let playWhite = true;
 let onlyQueenMovesWithoutCapture = 0;
 let chainedCapturePiece = null;
 let queenCaptureForbiddenDirection = [null, null];
+const moveAnimationDurationMs = 600;
 generateTitleWindow();
 
 // TO DO CSS HTML
 //responsywność:
-//bordery piece i szachowica dopracować i miniPiece ustawić lepsze
-//author do prawej
+//bordery szachowica dopracować i miniPiece ustawić lepsze, button się psuje na ekranie laptopa, author do prawej - to wszystko się psuje przez niedoszacowany container width
 //vmin vmax
 
 //html description
 //nazwy trochę bardziej BEM
-//smooth transition dla ruchów i gladkie przejscie miedzy tytułem, oknem wyboru i szachownica
-//obsługa text-stroke żeby się zabezpieczyć
+//smooth transition dla ruchów i fadeouty miedzy tytułem, oknem wyboru i szachownica, fadein jquery
+//obsługa text-stroke żeby się zabezpieczyć?
 //dopieścić okno wyboru na początku - fajny font na przyciski
+//kolorek na wygrane pionki
 
 //box shadow dla pól szachownicy?
 //wygląd bierek - dać w środku okrąg?
 //tekstura drewna?
 
 // TO DO LOGIKA JS
-//disable po końcu gry też na hover
 //tylko najlepsze bicia
 //bardziej randomowe ruchy, żeby wybierało ze wszystkich, a nie najpierw pionka potem ruch + żeby damka nie ustawiała się w normalnym ruchu nie na cdef3456?
 //czy remis jest gicior
-// damka chained bicie po jednej przekątnej (bez wracania - beenThere class)
 // przycisk odwróć szachowicę, pokaż możliwe ruchy? i pokaż ostatni ruch -- klasa justMoved
 
 //alert o biciu
@@ -637,3 +679,4 @@ generateTitleWindow();
 //mixin sass
 //nara zmienne globalne
 //może da radę bez @media
+//przemodułować kod

@@ -2,8 +2,8 @@ $boardSizeVertical: 90vw;
 $boardSizeHorizontal: 80vh;
 $nameSquareSizeVertical: 20 / 740 * $boardSizeVertical;
 $nameSquareSizeHorizontal: 20 / 740 * $boardSizeHorizontal;
-$pieceBorderThickness: clamp(1.2px, 85vmax * 0.0017, 2.2px);
-$secondaryBorderThickness: clamp(0.8px, 85vmax * 0.0012, 1.5px);
+// $pieceBorderThickness: clamp(1.2px, 120vmin * 0.0017, 2.2px);
+// $secondaryBorderThickness: clamp(0.8px, 120vmin * 0.0012, 1.5px);
 // $thirdBorderThickness: clamp(0.5px, $boardSizeVertical * 0.0007, 0.8px);
 
 $pieceSize: (2/3) * 100%;
@@ -24,23 +24,9 @@ $clickedColor: #ea2b2b;
 $borderColor: mix(darkgrey, black, 80%);
 $colorTransitionTime: 0.3s;
 
-//vertical screens
-@media (max-width: 699px) {
-    html {
-        font-size: clamp(10px, $nameSquareSizeVertical, 20px);
-    }
-}
-
-//horizontal screens
-@media (min-width: 700px) {
-    html {
-        font-size: $nameSquareSizeHorizontal;
-    }
-}
-
 html {
     font-family: $globalFont;
-    // font-size: 20px;
+    font-size: 20px;
 }
 
 body {
@@ -58,6 +44,8 @@ body {
     grid-template-columns: 0.2fr repeat(8, 1fr);
     grid-template-rows: repeat(8, 1fr) 0.2fr;
     grid-auto-flow: row;
+    width: $boardSizeHorizontal;
+    height: $boardSizeHorizontal;
 }
 
 .grid__square {
@@ -82,11 +70,11 @@ body {
         font-size: 1rem;
         font-family: $secondaryFont;
 
-        &Col {
+        &-col {
             text-transform: uppercase;
         }
 
-        &Row {
+        &-row {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -94,7 +82,7 @@ body {
     }
 }
 
-.capturedPieces {
+.captured-pieces {
     height: $minipieceSize;
     margin: $minipieceSize;
     display: flex;
@@ -102,23 +90,25 @@ body {
 }
 
 .button {
-    transition: 0.5s;
+    font-family: 'Source Sans Pro', sans-serif;
     font-size: 1rem;
+    transition: 0.5s;
     height: 50px;
     width: 150px;
     background-color: mix(white, lightgrey);
     text-transform: uppercase;
     font-weight: 550;
+    border: 1.5px solid black;
 
     &--reset {
         margin-top: $minipieceSize / 2;
         border-radius: 12px;
-        border: $secondaryBorderThickness solid black;
         font-weight: 650;
         font-size: 20px;
 
         &:hover,
         &:active {
+
             background-color: $clickedColor;
             color: white;
             font-weight: 900;
@@ -126,7 +116,6 @@ body {
     }
 
     &--color {
-        border: $secondaryBorderThickness solid black;
         font-size: 1.6rem;
         margin-top: 60px;
         width: 200px;
@@ -156,9 +145,11 @@ body {
     display: flex;
     flex-flow: column;
     justify-content: center;
+    width: 0.8 * $boardSizeHorizontal;
+    // width: 90vw;
 }
 
-.gameTitle {
+.game-title {
     font-family: 'Fleur De Leah', cursive;
     align-self: center;
     font-size: 10rem;
@@ -180,7 +171,7 @@ body {
     font-family: $secondaryFont;
 }
 
-.buttonContainer {
+.button-container {
     display: flex;
     flex-flow: row;
     justify-content: space-between;
@@ -188,30 +179,32 @@ body {
 }
 
 .piece {
+    // position: relative;
     width: $pieceSize;
     height: $pieceSize;
     border-radius: 50%;
-    border: $pieceBorderThickness solid;
+    border: 2.5px solid;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: left 0.6s, top 0.6s, transform 0.6s, translate 0.6s;
 
     &--black {
         background-color: black;
         border-color: white;
 
-        & .piece--queenDecoration {
+        & .piece--queen-decoration {
             border-color: white;
             background-color: mix(darkgrey, black, 50%);
         }
 
-        &.piece--canMove {
-            background-color: darken(mix(aqua, violet),10%);
+        &.piece--can-move {
+            background-color: darken(mix(aqua, violet), 10%);
 
         }
 
-        & .piece--canMove {
-            background-color: darken(mix(aqua, violet),10%);
+        & .piece--can-move {
+            background-color: darken(mix(aqua, violet), 10%);
         }
     }
 
@@ -219,33 +212,35 @@ body {
         background-color: white;
         border-color: black;
 
-        & .piece--queenDecoration {
+        & .piece--queen-decoration {
             border-color: black;
             background-color: mix(lightgrey, grey, 70%);
         }
 
-        &.piece--canMove {
+        &.piece--can-move {
             background-color: mix(aqua, violet);
 
         }
 
-        & .piece--canMove {
+        & .piece--can-move {
             background-color: darken(mix(aqua, violet), 20%);
 
         }
     }
 
-    &--queenDecoration {
+    &--queen-decoration {
         border-radius: 50%;
         width: $pieceSize / 1.5;
         height: $pieceSize / 1.5;
-        border: $secondaryBorderThickness solid;
+        border: 1.5px solid;
     }
 
-
+    &--won {
+        background-color: $clickedColor;
+    }
 }
 
-.miniPiece {
+.mini-piece {
     width: $minipieceSize;
     height: $minipieceSize;
     border-radius: 50%;
@@ -253,6 +248,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    margin: 1px;
 
     &--white {
         background-color: white;
@@ -268,45 +264,48 @@ body {
     }
 }
 
-.piece:hover .piece--queenDecoration,
-#pieceClicked .piece--queenDecoration,
-.piece:active .piece--queenDecoration {
+.piece-hover:hover .piece--queen-decoration,
+#piece-clicked .piece--queen-decoration,
+.piece-hover:hover .piece--queen-decoration {
     background-color: darken($clickedColor, 20%);
-    transition: $colorTransitionTime;
+    transition: background-color colorTransitionTime;
 }
 
-#pieceClicked,
-.piece:hover,
-.piece:active {
+.piece-hover:hover,
+#piece-clicked,
+.piece-hover:active {
     background-color: $clickedColor;
-    transition: $colorTransitionTime;
+    transition: background-color $colorTransitionTime;
 }
 
-.legalMove {
+.legal-move {
     width: $pieceSize / 2;
     height: $pieceSize / 2;
     border-radius: 50%;
     background-color: mix(aqua, violet);
-    border: $secondaryBorderThickness solid black;
+    border: 1.5px solid black;
 }
 
-.gameInfo {
+.game-info {
     display: flex;
     flex-direction: row;
     justify-content: end;
     text-transform: uppercase;
     font-weight: 550;
+    width: $boardSizeHorizontal;
+    font-size: 1rem;
 
-    &__turnCounter {
+    &__turn-counter {
         span {
             font-weight: 700;
         }
     }
 
-    &__whoToMove {
+    &__who-to-move {
         // display: flex;
         // align-items: center;
         margin-right: auto;
+        margin-left: $nameSquareSizeHorizontal;
 
         span {
             // margin-right: 5px;
@@ -322,18 +321,29 @@ body {
     }
 }
 
-@media (max-width: 699px) {
+@media (max-width: 700px) {
+    html {
+        font-size: clamp(10px, $nameSquareSizeVertical, 20px);
+    }
+
     .board {
         width: $boardSizeVertical;
         height: $boardSizeVertical;
     }
 
-    .gameInfo {
+    .piece {
+        border-width: 1.7px;
+        &--queen-decoration {
+            border-width: 1.2px;
+        }
+    }
+
+    .game-info {
         width: $boardSizeVertical;
         margin-top: 15vh;
         font-size: 1.4rem;
 
-        &__whoToMove {
+        &__who-to-move {
             margin-left: $nameSquareSizeVertical;
         }
     }
@@ -350,7 +360,7 @@ body {
     .button {
         &--color {
             width: 30vw;
-            height: 50px;
+            height: 45px;
         }
 
         &--white {
@@ -367,34 +377,15 @@ body {
             color: white;
             font-size: 1.8rem;
         }
-    }
-}
 
-@media (min-width: 700px) {
-
-    .board {
-        width: $boardSizeHorizontal;
-        height: $boardSizeHorizontal;
-    }
-
-    .gameInfo {
-        width: $boardSizeHorizontal;
-        font-size: 1rem;
-        // margin-top: 25vh;
-
-        &__whoToMove {
-            margin-left: $nameSquareSizeHorizontal;
+        &--reset {
+            width: 80px;
+            height: 35px;
+            font-size: 1.5rem;
+            border-radius: 8px;
         }
     }
-
-    .container {
-        width: 0.8 * $boardSizeHorizontal;
-    }
-
-    .button {
-        &--color {
-            width: 200px;
-            height: 75px;
-        }
+    .legal-move {
+        border-width: 1.2px;
     }
 }
