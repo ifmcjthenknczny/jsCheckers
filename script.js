@@ -47,7 +47,7 @@ function generateBoard() {
     document.body.appendChild(main);
 }
 
-function generateStartPosition() {
+function generateStartingPosition() {
     const blackSquares = document.querySelectorAll(".grid__square--black");
     const order = ['piece--black', 'piece--white'];
     if (!playWhite) order.reverse();
@@ -55,8 +55,10 @@ function generateStartPosition() {
         const piece = document.createElement('div');
         piece.classList.add('piece');
         piece.classList.add('piece-hover');
-        if (i < 3 * 4) piece.classList.add(order[0]);
-        else if (i >= 5 * 4) {
+        if (i < 3 * 4) {
+            piece.classList.add(order[0]);
+            // piece.addEventListener('transitionend', () => blockBoard = false)
+        } else if (i >= 5 * 4) {
             piece.classList.add(order[1]);
             piece.addEventListener('click', pieceHold);
         }
@@ -65,7 +67,7 @@ function generateStartPosition() {
 }
 
 function pieceHold() {
-    if (!isComputerTurn() && !endOfGame() && !chainedCapturePiece) {
+    if (!isComputerTurn() && !endOfGame() && !chainedCapturePiece && !boardBlock) {
         unhighlightPiecesThatCanMove();
         pieceUnhold();
         if ((legalNormalMovesOfPiece(this).length > 0 && !isThereACapturePossibility()) || (isThereACapturePossibility() && legalCapturesOfPiece(this).length > 0)) {
@@ -107,8 +109,9 @@ function removeLegalMovesMark() {
         for (let legalMoveMark of document.querySelectorAll('.legal-move')) legalMoveMark.remove();
 }
 
-function makeAMove() {
+async function makeAMove() {
     const clickedPiece = document.querySelector('#piece-clicked');
+    blockBoard = true;
     // prettier-ignore
     const isQueen = clickedPiece.classList.contains('piece--queen');
     // prettier-ignore
@@ -119,8 +122,11 @@ function makeAMove() {
 
         if (forcedCapture) removeCapturedPiece(findSquareOfAPieceToCapture(clickedPiece.parentElement.id, this.id));
         movePiece(clickedPiece.parentElement, this, moveAnimationDurationMs);
+        await transitionEnd(clickedPiece);
+        await sleep(moveAnimationDurationMs);
+        // transitionToEnd = new Promise(res => {});
+
         if (forcedCapture && legalCapturesOfPiece(clickedPiece).length > 0) {
-            removeLegalMovesMark();
             chainedCapturePiece = clickedPiece;
             generateLegalMovesMark(legalCapturesOfPiece(clickedPiece));
         } else {
@@ -134,33 +140,39 @@ function makeAMove() {
 }
 
 async function movePiece(startSquare, targetSquare, transitionTimeMs) {
-    const clickedPiece = startSquare.firstChild;
+    const pieceToMove = startSquare.firstChild;
     const [startCol, startRow] = startSquare.id;
     const [targetCol, targetRow] = targetSquare.id;
     const [startColIndex, targetColIndex] = [startCol, targetCol].map(x => cols.indexOf(x));
     const [startRowIndex, targetRowIndex] = [startRow, targetRow].map(x => +x - 1);
-    const squareWidth = parseInt(window.getComputedStyle(document.querySelector('.grid__square')).width, 10);
-    const transX = (targetColIndex - startColIndex) * squareWidth;
-    const transY = (startRowIndex - targetRowIndex) * squareWidth;
-    // const time = window.getComputedStyle(document.querySelector('.piece')).transition.split(' ')[1]
+    const squareWidth = parseInt(window.getComputedStyle(document.querySelector('.grid__square')).width, 10) + 2 * parseInt(((window.getComputedStyle(document.querySelector('.grid__square')).border).split(' '))[0], 10);
+
+    const boardPositionCoeff = playWhite ? 1 : -1;
+    const transX = (targetColIndex - startColIndex) * squareWidth * boardPositionCoeff;
+    const transY = (startRowIndex - targetRowIndex) * squareWidth * boardPositionCoeff;
     const {
         x: currX,
         y: currY,
-        width,
-    } = clickedPiece.getBoundingClientRect();
-    const size = width - 2 * parseInt(((window.getComputedStyle(clickedPiece).border).split(' '))[0], 10);
-    clickedPiece.style.position = 'fixed';
-    clickedPiece.style.width = size + 'px';
-    clickedPiece.style.height = size + 'px';
-    clickedPiece.style.transition = `translate ${transitionTimeMs}ms, transform ${transitionTimeMs}ms`;
-    clickedPiece.style.transform = `translate(${transX}px, ${transY}px)`;
+        width: pieceWidth
+    } = pieceToMove.getBoundingClientRect();
+    const size = pieceWidth - 2 * parseInt(((window.getComputedStyle(pieceToMove).border).split(' '))[0], 10);
+    pieceToMove.style.width = size + 'px';
+    pieceToMove.style.height = size + 'px';
+    pieceToMove.style.position = 'fixed';
+
+    pieceToMove.style.transition = `transform ${transitionTimeMs}ms`;
+    removeLegalMovesMark();
+    pieceToMove.style.transform = `translate(${transX}px, ${transY}px)`;
 
     await sleep(transitionTimeMs);
+    // await transitionEnd(pieceToMove);
 
-    clickedPiece.style.transform = '';
-    clickedPiece.style.position = '';
-
-    targetSquare.appendChild(clickedPiece);
+    targetSquare.appendChild(pieceToMove);
+    //remove attribiutes
+    pieceToMove.style.transform = '';
+    pieceToMove.style.position = '';
+    pieceToMove.style.width = '';
+    pieceToMove.style.height = '';
 }
 
 function findQueenCaptureForbiddenDirection(startSquareName, targetSquareName) {
@@ -188,19 +200,19 @@ function findAllLegalMoves() {
     return legalMoves
 }
 
-function computerMove() {
-    let pieceToMove, targetSquare, movementDuration;
+async function computerMove() {
+    blockBoard = true;
+
+    let pieceToMove, targetSquare;
 
     if (!chainedCapturePiece) {
         const [nameOfSquareOfPieceToMove, nameOfTargetSquare] = pickAMove(findAllLegalMoves());
         pieceToMove = document.querySelector(`#${nameOfSquareOfPieceToMove}`).firstElementChild;
         targetSquare = document.querySelector(`#${nameOfTargetSquare}`);
-        movementDuration = 800;
     } else {
         pieceToMove = chainedCapturePiece;
         const legalCaptures = legalCapturesOfPiece(pieceToMove);
         targetSquare = legalCaptures[Math.floor(Math.random() * legalCaptures.length)];
-        movementDuration = 500;
     }
 
     //prettier-ignore
@@ -210,7 +222,11 @@ function computerMove() {
 
     if (forcedCapture) removeCapturedPiece(findSquareOfAPieceToCapture(pieceToMove.parentElement.id, targetSquare.id));
 
-    movePiece(pieceToMove.parentElement, targetSquare, movementDuration);
+    movePiece(pieceToMove.parentElement, targetSquare, moveAnimationDurationMs);
+    await sleep(moveAnimationDurationMs);
+
+    await transitionEnd(pieceToMove);
+
     if (forcedCapture && legalCapturesOfPiece(pieceToMove).length > 0) {
         chainedCapturePiece = pieceToMove;
         computerMove();
@@ -219,6 +235,8 @@ function computerMove() {
         queenCaptureForbiddenDirection = [null, null];
         chainedCapturePiece = null;
         endTurn();
+        // tylko po transition
+        blockBoard = false;
     }
 }
 
@@ -613,14 +631,31 @@ async function fadeIn(elementSelector, time) {
     // console.timeEnd();
 }
 
-function startGame() {
+async function startGame() {
     generateBoard();
     generateGraveyards();
     generateButtons();
     generateGameInfo();
-    generateStartPosition();
+    generateStartingPosition();
     fadeIn('body', 200);
-    if (!playWhite) computerMove();
+    if (!playWhite) {
+        await sleep(1000);
+        computerMove();
+    }
+}
+
+// function transitionEnd(piece) {
+//     return new Promise((res) => piece.addEventListener('transitionend', res()))
+// }
+
+function transitionEnd(el) {
+    new Promise(resolve => {
+        const transitionEnded = e => {
+            el.removeEventListener('transitionend', transitionEnded);
+            resolve();
+        }
+        el.addEventListener('transitionend', transitionEnded);
+    });
 }
 
 const cols = 'abcdefgh'.split('');
@@ -632,7 +667,9 @@ let playWhite = true;
 let onlyQueenMovesWithoutCapture = 0;
 let chainedCapturePiece = null;
 let queenCaptureForbiddenDirection = [null, null];
+let boardBlock = playWhite ? false : true;
 const moveAnimationDurationMs = 600;
+// let transitionToEnd = new Promise(resolve => {});
 generateTitleWindow();
 
 // TO DO CSS HTML
@@ -656,6 +693,8 @@ generateTitleWindow();
 //bardziej randomowe ruchy, żeby wybierało ze wszystkich, a nie najpierw pionka potem ruch + żeby damka nie ustawiała się w normalnym ruchu nie na cdef3456?
 //czy remis jest gicior
 // przycisk odwróć szachowicę, pokaż możliwe ruchy? i pokaż ostatni ruch -- klasa justMoved
+//fadeout
+//lepszy block board
 
 //alert o biciu
 //wybór koloru pionków w dowolnym momencie?
@@ -680,3 +719,5 @@ generateTitleWindow();
 //nara zmienne globalne
 //może da radę bez @media
 //przemodułować kod
+//queenCaptureForbiddenDirection zlikwidowac
+//check if there are possible moves i funkcja pokazująca pionki które się mogą ruszyć jakoś scalić

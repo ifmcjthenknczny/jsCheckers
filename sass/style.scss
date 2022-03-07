@@ -19,6 +19,7 @@ $secondaryFont: 'Cousine',
 monospace;
 
 $blackSquareColor: rgba(170, 170, 170, 0.7);
+// $blackSquareColor: rgba(100, 100, 100, 0.7);
 $whiteSquareColor: rgba(255, 255, 255, 0.7);
 $clickedColor: #ea2b2b;
 $borderColor: mix(darkgrey, black, 80%);
@@ -104,7 +105,7 @@ body {
         margin-top: $minipieceSize / 2;
         border-radius: 12px;
         font-weight: 650;
-        font-size: 20px;
+        font-size: 22px;
 
         &:hover,
         &:active {
@@ -187,7 +188,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: left 0.6s, top 0.6s, transform 0.6s, translate 0.6s;
+    // transition: left 0.6s, top 0.6s, transform 0.6s, translate 0.6s;
 
     &--black {
         background-color: black;
@@ -333,6 +334,7 @@ body {
 
     .piece {
         border-width: 1.7px;
+
         &--queen-decoration {
             border-width: 1.2px;
         }
@@ -381,10 +383,11 @@ body {
         &--reset {
             width: 80px;
             height: 35px;
-            font-size: 1.5rem;
+            font-size: 16px;
             border-radius: 8px;
         }
     }
+
     .legal-move {
         border-width: 1.2px;
     }
