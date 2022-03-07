@@ -43,13 +43,15 @@ No setup needed. Just make sure you don't use Internet Explorer. For Android, Go
 * Turn counter and displaying whose turn is it.
 * Game reset button.
 
+* Smooth transition of pieces and between windows.
+
 * Board and surroundings fully generated from scratch with use of Javascript.
 
 To-do list:
 * Responsiveness improvement: borders and button sizes, justifying and aligning.
 * Code readibility improvement.
 * Disable hover effects after game ends.
-* Smooth transition of pieces and between windows.
+* Piece transition and user experience concern.
 * SEO
 
 ## Status
