@@ -704,6 +704,8 @@ generateTitleWindow();
 //2 players vs random ai + okno wyboru + obracanie szachownicy po każdym ruchu
 //log ruchów aside & cofanie
 //podświetlić też CHOOSE YOUR COLOR kiedy najedzie się na któryś przycisk na oknie startowym
+//dostosować animację do komórek
+//jesli bicie jest chainowane to niech wyswietla ruchy jeszcze przed skończeniem transition
 
 // PRZEJRZYSTOŚĆ KODU
 //scalić funkcje ruchów damki i zwykłych pionków do jednej, mniejsze funkcje wszędzie generalnie, szczegolnie move dla obu przypadków, generateboard
