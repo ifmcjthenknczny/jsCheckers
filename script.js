@@ -1,3 +1,4 @@
+// simple functions
 function range(size, startAt = 0) {
     return [...Array(size).keys()].map(i => i + startAt);
 }
@@ -6,68 +7,10 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function generateBoard() {
-    let whiteSquare = false;
-    const main = document.querySelector('main');
-    const grid = document.createElement('section');
-    grid.classList.add('board');
-    const rowOrder = playWhite ? [...rows].reverse() : [...rows];
-    const colOrder = playWhite ? [...cols] : [...cols].reverse();
 
-    for (let rowName of rowOrder) {
-        whiteSquare = !whiteSquare;
-        const squareWithName = document.createElement('div');
-        squareWithName.classList.add('grid__square--name-row', 'grid__square--name');
-        squareWithName.innerText = rowName;
-        grid.append(squareWithName);
-        for (let colName of colOrder) {
-            const square = document.createElement('div');
-            const nameOfSquare = `${colName + rowName}`;
-            square.classList.add('grid__square');
-            square.setAttribute('id', nameOfSquare);
-            if (whiteSquare) {
-                square.classList.add('grid__square--white', 'grid__square--whiteClicked');
-                square.addEventListener('click', pieceUnhold);
-            } else {
-                square.classList.add('grid__square--black', 'grid__square--blackClicked');
-                square.addEventListener('click', makeAMove);
-            }
-            whiteSquare = !whiteSquare;
-            grid.appendChild(square);
-        }
-    }
-    grid.append(document.createElement('div'));
-    for (let colName of colOrder) {
-        const squareWithName = document.createElement('div');
-        squareWithName.classList.add('grid__square--name-col', 'grid__square--name');
-        squareWithName.innerText = colName;
-        grid.append(squareWithName);
-    }
-    main.appendChild(grid);
-    document.body.appendChild(main);
-}
-
-function generateStartingPosition() {
-    const blackSquares = document.querySelectorAll(".grid__square--black");
-    const order = ['piece--black', 'piece--white'];
-    if (!playWhite) order.reverse();
-    for (let i = 0; i < blackSquares.length; i++) {
-        const piece = document.createElement('div');
-        piece.classList.add('piece');
-        piece.classList.add('piece-hover');
-        if (i < 3 * 4) {
-            piece.classList.add(order[0]);
-            // piece.addEventListener('transitionend', () => blockBoard = false)
-        } else if (i >= 5 * 4) {
-            piece.classList.add(order[1]);
-            piece.addEventListener('click', pieceHold);
-        }
-        if (i < 3 * 4 || i >= 5 * 4) blackSquares[i].append(piece);
-    }
-}
-
+// piece and legal moves service
 function pieceHold() {
-    if (!isComputerTurn() && !endOfGame() && !chainedCapturePiece && !boardBlock) {
+    if (!isComputerTurn() && !endOfGame() && !chainedCapturePiece) {
         unhighlightPiecesThatCanMove();
         pieceUnhold();
         if ((legalNormalMovesOfPiece(this).length > 0 && !isThereACapturePossibility()) || (isThereACapturePossibility() && legalCapturesOfPiece(this).length > 0)) {
@@ -77,6 +20,13 @@ function pieceHold() {
         } else {
             highlightPiecesThatCanMove(this);
         }
+    }
+}
+
+function pieceUnhold() {
+    if (chainedCapturePiece === null) {
+        if (document.querySelector('#piece-clicked')) document.querySelector('#piece-clicked').removeAttribute('id');
+        removeLegalMovesMark();
     }
 }
 
@@ -97,10 +47,11 @@ function unhighlightPiecesThatCanMove() {
     for (let piece of piecesToRemoveClass) piece.classList.remove('piece--can-move');
 }
 
-function pieceUnhold() {
-    if (chainedCapturePiece === null) {
-        if (document.querySelector('#piece-clicked')) document.querySelector('#piece-clicked').removeAttribute('id');
-        removeLegalMovesMark();
+function generateLegalMovesMark(legalMovesList) {
+    for (let legalMoveSquare of legalMovesList) {
+        const legalMoveMark = document.createElement('div');
+        legalMoveMark.classList.add('legal-move');
+        legalMoveSquare.appendChild(legalMoveMark);
     }
 }
 
@@ -109,9 +60,10 @@ function removeLegalMovesMark() {
         for (let legalMoveMark of document.querySelectorAll('.legal-move')) legalMoveMark.remove();
 }
 
+
+// turns
 async function makeAMove() {
     const clickedPiece = document.querySelector('#piece-clicked');
-    blockBoard = true;
     // prettier-ignore
     const isQueen = clickedPiece.classList.contains('piece--queen');
     // prettier-ignore
@@ -122,13 +74,11 @@ async function makeAMove() {
 
         if (forcedCapture) removeCapturedPiece(findSquareOfAPieceToCapture(clickedPiece.parentElement.id, this.id));
         movePiece(clickedPiece.parentElement, this, moveAnimationDurationMs);
-        await transitionEnd(clickedPiece);
+        // await transitionEnd(clickedPiece);
         await sleep(moveAnimationDurationMs);
-        // transitionToEnd = new Promise(res => {});
 
         if (forcedCapture && legalCapturesOfPiece(clickedPiece).length > 0) {
             chainedCapturePiece = clickedPiece;
-            generateLegalMovesMark(legalCapturesOfPiece(clickedPiece));
         } else {
             chainedCapturePiece = null;
             queenCaptureForbiddenDirection = [null, null];
@@ -139,70 +89,7 @@ async function makeAMove() {
     }
 }
 
-async function movePiece(startSquare, targetSquare, transitionTimeMs) {
-    const pieceToMove = startSquare.firstChild;
-    const [startCol, startRow] = startSquare.id;
-    const [targetCol, targetRow] = targetSquare.id;
-    const [startColIndex, targetColIndex] = [startCol, targetCol].map(x => cols.indexOf(x));
-    const [startRowIndex, targetRowIndex] = [startRow, targetRow].map(x => +x - 1);
-    const squareWidth = parseInt(window.getComputedStyle(document.querySelector('.grid__square')).width, 10) + 2 * parseInt(((window.getComputedStyle(document.querySelector('.grid__square')).border).split(' '))[0], 10);
-
-    const boardPositionCoeff = playWhite ? 1 : -1;
-    const transX = (targetColIndex - startColIndex) * squareWidth * boardPositionCoeff;
-    const transY = (startRowIndex - targetRowIndex) * squareWidth * boardPositionCoeff;
-    const {
-        x: currX,
-        y: currY,
-        width: pieceWidth
-    } = pieceToMove.getBoundingClientRect();
-    const size = pieceWidth - 2 * parseInt(((window.getComputedStyle(pieceToMove).border).split(' '))[0], 10);
-    pieceToMove.style.width = size + 'px';
-    pieceToMove.style.height = size + 'px';
-    pieceToMove.style.position = 'fixed';
-
-    pieceToMove.style.transition = `transform ${transitionTimeMs}ms`;
-    removeLegalMovesMark();
-    pieceToMove.style.transform = `translate(${transX}px, ${transY}px)`;
-
-    await sleep(transitionTimeMs);
-    // await transitionEnd(pieceToMove);
-
-    targetSquare.appendChild(pieceToMove);
-    //remove attribiutes
-    pieceToMove.style.transform = '';
-    pieceToMove.style.position = '';
-    pieceToMove.style.width = '';
-    pieceToMove.style.height = '';
-}
-
-function findQueenCaptureForbiddenDirection(startSquareName, targetSquareName) {
-    const [startCol, startRow] = startSquareName;
-    const [targetCol, targetRow] = targetSquareName;
-    return [targetCol < startCol, targetRow < startRow];
-}
-
-function findAllLegalMoves() {
-    const selector = playWhite ? ".piece--black" : ".piece--white";
-    const allComputerPieces = [...document.querySelectorAll(selector)];
-    const legalMoves = {};
-
-    if (isThereACapturePossibility()) {
-        for (let piece of allComputerPieces) {
-            const legalMovesList = legalCapturesOfPiece(piece);
-            if (legalMovesList.length > 0) legalMoves[piece.parentElement.id] = legalMovesList;
-        }
-    } else {
-        for (let piece of allComputerPieces) {
-            const legalMovesList = legalNormalMovesOfPiece(piece);
-            if (legalMovesList.length > 0) legalMoves[piece.parentElement.id] = legalMovesList;
-        }
-    }
-    return legalMoves
-}
-
 async function computerMove() {
-    blockBoard = true;
-
     let pieceToMove, targetSquare;
 
     if (!chainedCapturePiece) {
@@ -225,7 +112,7 @@ async function computerMove() {
     movePiece(pieceToMove.parentElement, targetSquare, moveAnimationDurationMs);
     await sleep(moveAnimationDurationMs);
 
-    await transitionEnd(pieceToMove);
+    // await transitionEnd(pieceToMove);
 
     if (forcedCapture && legalCapturesOfPiece(pieceToMove).length > 0) {
         chainedCapturePiece = pieceToMove;
@@ -235,51 +122,21 @@ async function computerMove() {
         queenCaptureForbiddenDirection = [null, null];
         chainedCapturePiece = null;
         endTurn();
-        // tylko po transition
-        blockBoard = false;
     }
 }
 
 function endTurn() {
     lastMoveBlack = !lastMoveBlack;
-    if (endOfGame()) {
-        congratsToWinner();
-        disableHover();
-    } else {
+    if (endOfGame()) congratsToWinner();
+    else {
         changeGameInfo();
         if (isComputerTurn()) computerMove();
-    }
-}
-
-function disableHover() {
-    const allPieces = [...document.querySelectorAll('.piece-hover')];
-    for (piece of allPieces) {
-        piece.classList.remove('piece-hover');
-        // piece.classList.add('piece--won');
     }
 }
 
 function isComputerTurn() {
     if ((playWhite && !lastMoveBlack) || !playWhite && lastMoveBlack) return true
     return false
-}
-
-function crownTheQueen(piece) {
-    piece.classList.add("piece--queen");
-    const queenDecoration = document.createElement('div');
-    queenDecoration.classList.add("piece--queen-decoration");
-    piece.appendChild(queenDecoration);
-}
-
-function congratsToWinner() {
-    const whoToMove = document.querySelector(".game-info__who-to-move");
-    if (onlyQueenMovesWithoutCapture >= 30) {
-        whoToMove.innerHTML = 'It is a <span>Draw</span>!'
-    } else if (lastMoveBlack) {
-        whoToMove.innerHTML = '<span>Black</span> won!'
-    } else {
-        whoToMove.innerHTML = '<span class="white">White</span> won!'
-    }
 }
 
 function changeGameInfo() {
@@ -294,6 +151,101 @@ function changeGameInfo() {
     }
 }
 
+
+// animations
+async function fadeIn(elementSelector, time) {
+    let opacity = 0;
+    const element = document.querySelector(elementSelector);
+    element.style.opacity = opacity;
+    const opacityTarget = 1;
+    const deltaOpacity = 0.04;
+    while (opacity !== opacityTarget) {
+        await sleep(time * deltaOpacity);
+        opacity = +(window.getComputedStyle(element).getPropertyValue("opacity"))
+        opacity = opacity + deltaOpacity;
+        element.style.opacity = opacity;
+    }
+}
+
+async function movePiece(startSquare, targetSquare, transitionTimeMs) {
+    const pieceToMove = startSquare.firstChild;
+    const [startCol, startRow] = startSquare.id;
+    const [targetCol, targetRow] = targetSquare.id;
+    const [startColIndex, targetColIndex] = [startCol, targetCol].map(x => cols.indexOf(x));
+    const [startRowIndex, targetRowIndex] = [startRow, targetRow].map(x => +x - 1);
+    const squareWidth = parseInt(window.getComputedStyle(document.querySelector('.grid__square')).width, 10) + 2 * parseInt(((window.getComputedStyle(document.querySelector('.grid__square')).border).split(' '))[0], 10);
+
+    const boardPositionCoeff = whiteOnBottom ? 1 : -1;
+    const transX = (targetColIndex - startColIndex) * squareWidth * boardPositionCoeff;
+    const transY = (startRowIndex - targetRowIndex) * squareWidth * boardPositionCoeff;
+    const {
+        x: currX,
+        y: currY,
+        width: pieceWidth
+    } = pieceToMove.getBoundingClientRect();
+    const size = pieceWidth - 2 * parseInt(((window.getComputedStyle(pieceToMove).border).split(' '))[0], 10);
+
+    if (!isComputerTurn()) {
+        removeLegalMovesMark();
+        if (forcedCapture) {
+            const dummyPiece = pieceToMove.cloneNode(true);
+            targetSquare.appendChild(dummyPiece);
+            if (legalCapturesOfPiece(dummyPiece).length > 0) generateLegalMovesMark(legalCapturesOfPiece(dummyPiece));
+            dummyPiece.remove();
+        }
+    }
+
+    pieceToMove.style.width = size + 'px';
+    pieceToMove.style.height = size + 'px';
+    pieceToMove.style.position = 'fixed';
+
+    pieceToMove.style.transition = `transform ${transitionTimeMs}ms`;
+    pieceToMove.style.transform = `translate(${transX}px, ${transY}px)`;
+
+    await sleep(transitionTimeMs);
+    // await transitionEnd(pieceToMove);
+
+    targetSquare.appendChild(pieceToMove);
+    pieceToMove.style.transform = '';
+    pieceToMove.style.position = '';
+    pieceToMove.style.width = '';
+    pieceToMove.style.height = '';
+}
+
+
+// move rules-related functions
+function findAllLegalMoves() {
+    const selector = playWhite ? ".piece--black" : ".piece--white";
+    const allComputerPieces = [...document.querySelectorAll(selector)];
+    const legalMoves = {};
+
+    if (isThereACapturePossibility()) {
+        for (let piece of allComputerPieces) {
+            const legalMovesList = legalCapturesOfPiece(piece);
+            if (legalMovesList.length > 0) legalMoves[piece.parentElement.id] = legalMovesList;
+        }
+    } else {
+        for (let piece of allComputerPieces) {
+            const legalMovesList = legalNormalMovesOfPiece(piece);
+            if (legalMovesList.length > 0) legalMoves[piece.parentElement.id] = legalMovesList;
+        }
+    }
+    return legalMoves
+}
+
+function findQueenCaptureForbiddenDirection(startSquareName, targetSquareName) {
+    const [startCol, startRow] = startSquareName;
+    const [targetCol, targetRow] = targetSquareName;
+    return [targetCol < startCol, targetRow < startRow];
+}
+
+function crownTheQueen(piece) {
+    piece.classList.add("piece--queen");
+    const queenDecoration = document.createElement('div');
+    queenDecoration.classList.add("piece--queen-decoration");
+    piece.appendChild(queenDecoration);
+}
+
 function removeCapturedPiece(square) {
     const isQueen = square.firstChild.classList.contains('piece--queen');
     square.firstChild.remove();
@@ -302,7 +254,7 @@ function removeCapturedPiece(square) {
     if (isQueen) pieceMini.classList.add('mini-piece--queen');
     else lastMoveBlack ? pieceMini.classList.add('mini-piece--black') : pieceMini.classList.add('mini-piece--white');
     pieceMini.classList.add('mini-piece')
-    const targetGraveyard = ((!lastMoveBlack && playWhite) || lastMoveBlack && !playWhite) ? '.captured-pieces--top' : '.captured-pieces--bottom';
+    const targetGraveyard = ((!lastMoveBlack && whiteOnBottom) || lastMoveBlack && !whiteOnBottom) ? '.captured-pieces--top' : '.captured-pieces--bottom';
     document.querySelector(targetGraveyard).appendChild(pieceMini);
 }
 
@@ -313,44 +265,6 @@ function promotion(piece) {
         return true
     }
     return false
-}
-
-function generateButtons() {
-    const resetButton = document.createElement('button');
-    resetButton.classList.add('button', 'button--reset');
-    resetButton.innerText = 'restart';
-    resetButton.addEventListener("click", () => {
-        document.body.innerHTML = '';
-        document.body.appendChild(document.createElement('main'));
-        lastMoveBlack = true;
-        turn = 1;
-        forcedCapture = false;
-        onlyQueenMovesWithoutCapture = 0;
-        chainedCapturePiece = null;
-        queenCaptureForbiddenDirection = [null, null];
-        generateFirstQuestion();
-    });
-    document.body.appendChild(resetButton);
-}
-
-function endOfGame() {
-    const selector = lastMoveBlack ? ".piece--white" : ".piece--black";
-    const stillPieces = (document.querySelectorAll(selector)).length;
-    if (stillPieces === 0) return true;
-    if (!checkIfThereArePossibleMoves()) return true;
-    if (onlyQueenMovesWithoutCapture >= 30) return true;
-    return false
-}
-
-function checkIfThereArePossibleMoves() {
-    const selector = lastMoveBlack ? ".piece--white" : ".piece--black";
-    const allColorPieces = [...document.querySelectorAll(selector)];
-    const legalNormalMoves = allColorPieces.map(p => legalNormalMovesOfPiece(p).length);
-    const legalCaptures = allColorPieces.map(p => legalCapturesOfPiece(p).length);
-    const legalMoves = legalNormalMoves.concat(legalCaptures);
-    const sumOfLegalMoves = legalMoves.reduce((total, curr) => total + curr);
-    if (sumOfLegalMoves === 0) return false
-    return true
 }
 
 function isThereACapturePossibility() {
@@ -391,7 +305,8 @@ function legalCapturesOfPiece(piece) {
         //checks if target square is not occupied and there is a piece to capture
         for (let captureCandidate of captureCandidates) {
             const targetSquare = document.querySelector(`#${captureCandidate}`);
-            if (!targetSquare.firstElementChild && !!findSquareOfAPieceToCapture(pieceSquare, captureCandidate)) capturesPossible.push(targetSquare);
+            const isLegalTargetSquare = targetSquare.firstElementChild ? !targetSquare.firstElementChild.classList.contains('piece') : true;
+            if (isLegalTargetSquare && !!findSquareOfAPieceToCapture(pieceSquare, captureCandidate)) capturesPossible.push(targetSquare);
         }
     } else {
         for (let colsUp of [true, false]) {
@@ -440,26 +355,30 @@ function diagonalQueenCaptures(startingSquare, colsIncrease, rowsIncrease) {
     const classOfQueen = lastMoveBlack ? 'piece--white' : 'piece--black';
 
     let [startingCol, startingRow] = startingSquare;
-    let rowIndex = rows.indexOf(+startingRow);
-    let colIndex = cols.indexOf(startingCol);
     const possibleSquares = [];
     const colBoundary = colsIncrease ? cols.length - 1 : 0;
     const rowBoundary = rowsIncrease ? rows.length - 1 : 0;
     const deltaCol = colsIncrease ? 1 : -1;
     const deltaRow = rowsIncrease ? 1 : -1;
-    colIndex += deltaCol;
-    rowIndex += deltaRow;
-    let freeSquareFlag = false;
+    let colIndex = cols.indexOf(startingCol) + deltaCol;
+    let rowIndex = rows.indexOf(+startingRow) + deltaRow;
+    let thereIsPieceToCapture = false;
 
     while (rowIndex !== rowBoundary + deltaRow && colIndex !== colBoundary + deltaCol) {
+        // loops over diagonal in specified direction by colsIncrease and rowsIncrease
+        // breaks the loop if it finds piece of the same color
+        // if it finds first piece of opposite color, thereIsPieceToCapture is changed to true
+        // when thereIsPieceToCapture is true, every free square is added to array which is later returned
+        // breaks the loop if it finds another piece
         const squareName = `${cols[colIndex]}${rowIndex+1}`;
         const square = document.querySelector(`#${squareName}`);
-        if (!!square.firstChild) {
-            if (freeSquareFlag) break;
-            else if (square.firstChild.classList.contains(classToCapture)) freeSquareFlag = true;
+        const isSquareTaken = !!square.firstChild && square.firstChild.classList.contains('piece')
+
+        if (isSquareTaken) {
+            if (thereIsPieceToCapture) break;
+            else if (square.firstChild.classList.contains(classToCapture)) thereIsPieceToCapture = true;
             else if (square.firstChild.classList.contains(classOfQueen)) break;
-        }
-        if (!square.firstChild && freeSquareFlag) possibleSquares.push(square);
+        } else if (!isSquareTaken && thereIsPieceToCapture) possibleSquares.push(square);
 
         colIndex += deltaCol;
         rowIndex += deltaRow;
@@ -467,26 +386,15 @@ function diagonalQueenCaptures(startingSquare, colsIncrease, rowsIncrease) {
     return possibleSquares
 }
 
-function pickAMove(legalMovesDict) {
-    const piecesThatCanMove = Object.keys(legalMovesDict);
-    const pieceToMove = piecesThatCanMove[Math.floor(Math.random() * piecesThatCanMove.length)];
-    const possibleMoves = legalMovesDict[pieceToMove];
-    const targetSquare = possibleMoves.length === 1 ? possibleMoves[0].id : possibleMoves[Math.floor(Math.random() * possibleMoves.length)].id;
-
-    return [pieceToMove, targetSquare]
-}
-
 function diagonalQueenMoves(startingSquare, colsIncrease, rowsIncrease) {
     let [startingCol, startingRow] = startingSquare;
-    let rowIndex = rows.indexOf(+startingRow);
-    let colIndex = cols.indexOf(startingCol);
     const possibleSquares = [];
     const colBoundary = colsIncrease ? cols.length - 1 : 0;
     const rowBoundary = rowsIncrease ? rows.length - 1 : 0;
     const deltaCol = colsIncrease ? 1 : -1;
     const deltaRow = rowsIncrease ? 1 : -1;
-    colIndex += deltaCol;
-    rowIndex += deltaRow;
+    let rowIndex = rows.indexOf(+startingRow) + deltaRow;
+    let colIndex = cols.indexOf(startingCol) + deltaCol;
     while (rowIndex !== rowBoundary + deltaRow && colIndex !== colBoundary + deltaCol) {
         const squareName = `${cols[colIndex]}${rowIndex+1}`;
         const square = document.querySelector(`#${squareName}`);
@@ -521,12 +429,137 @@ function findSquareOfAPieceToCapture(originalSquare, targetSquare) {
     }
 }
 
-function generateLegalMovesMark(legalMovesList) {
-    for (let legalMoveSquare of legalMovesList) {
-        const legalMoveMark = document.createElement('div');
-        legalMoveMark.classList.add('legal-move');
-        legalMoveSquare.appendChild(legalMoveMark);
+
+// end game
+function congratsToWinner() {
+    const whoToMove = document.querySelector(".game-info__who-to-move");
+    if (onlyQueenMovesWithoutCapture >= 30) whoToMove.innerHTML = 'It is a <span>Draw</span>!';
+    else if (lastMoveBlack) whoToMove.innerHTML = '<span>Black</span> won!';
+    else whoToMove.innerHTML = '<span class="white">White</span> won!';
+
+    const allPieces = [...document.querySelectorAll('.piece')];
+    for (piece of allPieces) {
+        piece.classList.remove('piece-hover');
+        piece.classList.add('piece--won');
     }
+    const allQueenDecorations = [...document.querySelectorAll('.piece--queen-decoration')];
+    if (allQueenDecorations.length > 0) {
+        for (let crown of allQueenDecorations) {
+            crown.classList.remove('piece--queen-decoration');
+            crown.classList.add('piece--queen-decoration-won');
+        }
+    }
+}
+
+function endOfGame() {
+    const selector = lastMoveBlack ? ".piece--white" : ".piece--black";
+    const stillPieces = (document.querySelectorAll(selector)).length;
+    if (stillPieces === 0) return true;
+    if (!checkIfThereArePossibleMoves()) return true;
+    if (onlyQueenMovesWithoutCapture >= 30) return true;
+    return false
+}
+
+function checkIfThereArePossibleMoves() {
+    const selector = lastMoveBlack ? ".piece--white" : ".piece--black";
+    const allColorPieces = [...document.querySelectorAll(selector)];
+    const legalNormalMoves = allColorPieces.map(p => legalNormalMovesOfPiece(p).length);
+    const legalCaptures = allColorPieces.map(p => legalCapturesOfPiece(p).length);
+    const legalMoves = legalNormalMoves.concat(legalCaptures);
+    const sumOfLegalMoves = legalMoves.reduce((total, curr) => total + curr);
+    if (sumOfLegalMoves === 0) return false
+    return true
+}
+
+
+// computer AI
+function pickAMove(legalMovesDict) {
+    const piecesThatCanMove = Object.keys(legalMovesDict);
+    const pieceToMove = piecesThatCanMove[Math.floor(Math.random() * piecesThatCanMove.length)];
+    const possibleMoves = legalMovesDict[pieceToMove];
+    const targetSquare = possibleMoves.length === 1 ? possibleMoves[0].id : possibleMoves[Math.floor(Math.random() * possibleMoves.length)].id;
+
+    return [pieceToMove, targetSquare]
+}
+
+
+// generate game components
+function generateBoard() {
+    let whiteSquare = false;
+    const main = document.querySelector('main');
+    const grid = document.createElement('section');
+    grid.classList.add('board');
+    const rowOrder = whiteOnBottom ? [...rows].reverse() : [...rows];
+    const colOrder = whiteOnBottom ? [...cols] : [...cols].reverse();
+
+    for (let rowName of rowOrder) {
+        whiteSquare = !whiteSquare;
+        const squareWithName = document.createElement('div');
+        squareWithName.classList.add('grid__square--name-row', 'grid__square--name');
+        squareWithName.innerText = rowName;
+        grid.append(squareWithName);
+        for (let colName of colOrder) {
+            const square = document.createElement('div');
+            const nameOfSquare = `${colName + rowName}`;
+            square.classList.add('grid__square');
+            square.setAttribute('id', nameOfSquare);
+            if (whiteSquare) {
+                square.classList.add('grid__square--white', 'grid__square--whiteClicked');
+                square.addEventListener('click', pieceUnhold);
+            } else {
+                square.classList.add('grid__square--black', 'grid__square--blackClicked');
+                square.addEventListener('click', makeAMove);
+            }
+            whiteSquare = !whiteSquare;
+            grid.appendChild(square);
+        }
+    }
+    grid.append(document.createElement('div'));
+    for (let colName of colOrder) {
+        const squareWithName = document.createElement('div');
+        squareWithName.classList.add('grid__square--name-col', 'grid__square--name');
+        squareWithName.innerText = colName;
+        grid.append(squareWithName);
+    }
+    main.appendChild(grid);
+    document.body.appendChild(main);
+}
+
+function generateStartingPosition() {
+    const blackSquares = document.querySelectorAll(".grid__square--black");
+    const order = ['piece--black', 'piece--white'];
+    if (!whiteOnBottom) order.reverse();
+    for (let i = 0; i < blackSquares.length; i++) {
+        const piece = document.createElement('div');
+        piece.classList.add('piece');
+        piece.classList.add('piece-hover');
+        if (i < 3 * 4) {
+            piece.classList.add(order[0]);
+            // piece.addEventListener('transitionend', () => blockBoard = false)
+        } else if (i >= 5 * 4) {
+            piece.classList.add(order[1]);
+            piece.addEventListener('click', pieceHold);
+        }
+        if (i < 3 * 4 || i >= 5 * 4) blackSquares[i].append(piece);
+    }
+}
+
+function generateButtons() {
+    const resetButton = document.createElement('button');
+    resetButton.classList.add('button', 'button--reset');
+    resetButton.innerText = 'restart';
+    resetButton.addEventListener("click", () => {
+        document.body.innerHTML = '';
+        document.body.appendChild(document.createElement('main'));
+        lastMoveBlack = true;
+        turn = 1;
+        forcedCapture = false;
+        onlyQueenMovesWithoutCapture = 0;
+        chainedCapturePiece = null;
+        queenCaptureForbiddenDirection = [null, null];
+        generateFirstQuestion();
+    });
+    document.body.appendChild(resetButton);
 }
 
 function generateGraveyards() {
@@ -572,7 +605,6 @@ async function generateTitleWindow() {
     fadeIn('.container', 300);
 
     await sleep(3500);
-    // fade('.container',5000000);
     container.remove();
     generateFirstQuestion();
 }
@@ -594,41 +626,39 @@ function generateFirstQuestion() {
     buttonBlack.innerText = 'black';
     buttonWhite.addEventListener('click', () => {
         playWhite = true;
-        // fade('.container',800);
+        whiteOnBottom = true;
         main.innerHTML = '';
         startGame();
     })
+
     buttonBlack.addEventListener('click', () => {
         playWhite = false;
-        // fade('.container',800);
+        whiteOnBottom = false;
         main.innerHTML = '';
         startGame();
     })
+
+    for (let event of ['mouseover', 'mouseout']) {
+        buttonWhite.addEventListener(event, () => {
+            const question = document.querySelector('.question');
+            question.classList.toggle('question--hover-white');
+        })
+    }
+
+    // for (let event of ['mouseover', 'mouseout']) {
+    //     buttonBlack.addEventListener(event, () => {
+    //         const question = document.querySelector('.question');
+    //         question.classList.toggle('question--hover-black');
+    //     })
+    // }
+
     container.innerHTML = '';
     container.appendChild(question);
     buttons.appendChild(buttonWhite);
     buttons.appendChild(buttonBlack);
     container.appendChild(buttons);
-    // container.setAttribute('opacity',0);
     main.appendChild(container);
-    // container.fadeIn("fast")
     fadeIn('.container', 800);
-}
-
-async function fadeIn(elementSelector, time) {
-    let opacity = 0;
-    const element = document.querySelector(elementSelector);
-    element.style.opacity = opacity;
-    const opacityTarget = 1;
-    const deltaOpacity = 0.04;
-    // console.time();
-    while (opacity !== opacityTarget) {
-        await sleep(time * deltaOpacity);
-        opacity = +(window.getComputedStyle(element).getPropertyValue("opacity"))
-        opacity = opacity + deltaOpacity;
-        element.style.opacity = opacity;
-    }
-    // console.timeEnd();
 }
 
 async function startGame() {
@@ -644,82 +674,17 @@ async function startGame() {
     }
 }
 
-// function transitionEnd(piece) {
-//     return new Promise((res) => piece.addEventListener('transitionend', res()))
-// }
 
-function transitionEnd(el) {
-    new Promise(resolve => {
-        const transitionEnded = e => {
-            el.removeEventListener('transitionend', transitionEnded);
-            resolve();
-        }
-        el.addEventListener('transitionend', transitionEnded);
-    });
-}
-
+// globals
 const cols = 'abcdefgh'.split('');
 const rows = range(8, 1);
 let turn = 1;
 let forcedCapture = false;
 let lastMoveBlack = true;
 let playWhite = true;
+let whiteOnBottom = true;
 let onlyQueenMovesWithoutCapture = 0;
 let chainedCapturePiece = null;
 let queenCaptureForbiddenDirection = [null, null];
-let boardBlock = playWhite ? false : true;
 const moveAnimationDurationMs = 600;
-// let transitionToEnd = new Promise(resolve => {});
 generateTitleWindow();
-
-// TO DO CSS HTML
-//responsywność:
-//bordery szachowica dopracować i miniPiece ustawić lepsze, button się psuje na ekranie laptopa, author do prawej - to wszystko się psuje przez niedoszacowany container width
-//vmin vmax
-
-//html description
-//nazwy trochę bardziej BEM
-//smooth transition dla ruchów i fadeouty miedzy tytułem, oknem wyboru i szachownica, fadein jquery
-//obsługa text-stroke żeby się zabezpieczyć?
-//dopieścić okno wyboru na początku - fajny font na przyciski
-//kolorek na wygrane pionki
-
-//box shadow dla pól szachownicy?
-//wygląd bierek - dać w środku okrąg?
-//tekstura drewna?
-
-// TO DO LOGIKA JS
-//tylko najlepsze bicia
-//bardziej randomowe ruchy, żeby wybierało ze wszystkich, a nie najpierw pionka potem ruch + żeby damka nie ustawiała się w normalnym ruchu nie na cdef3456?
-//czy remis jest gicior
-// przycisk odwróć szachowicę, pokaż możliwe ruchy? i pokaż ostatni ruch -- klasa justMoved
-//fadeout
-//lepszy block board
-
-//alert o biciu
-//wybór koloru pionków w dowolnym momencie?
-//dać też inne rozmiary niż 8x8
-//unhold na body
-//drag and drop
-//2 players vs random ai + okno wyboru + obracanie szachownicy po każdym ruchu
-//log ruchów aside & cofanie
-//podświetlić też CHOOSE YOUR COLOR kiedy najedzie się na któryś przycisk na oknie startowym
-//dostosować animację do komórek
-//jesli bicie jest chainowane to niech wyswietla ruchy jeszcze przed skończeniem transition
-
-// PRZEJRZYSTOŚĆ KODU
-//scalić funkcje ruchów damki i zwykłych pionków do jednej, mniejsze funkcje wszędzie generalnie, szczegolnie move dla obu przypadków, generateboard
-//na klasy podzielić funkcje, gdzie w sumie biorę to samo - klasy Game i Piece
-//forcedcapture - po co to i dlaczego musi być
-//za dużo zmiennej z klikniętą bierką - wyłączyć ją i tylko zmieniać jej zawartość? dodać jako argument?, w ogóle elementy querySelector na zewnątz?
-//opisac funkcje
-//readme github
-//funkcje po kolei umiejscowic w kodzie
-//zamiast clicked piece == this?
-//upewnić się że wyrzuca w jednym typie zmiennej (obiekt) + dodać typy zmiennych?
-//mixin sass
-//nara zmienne globalne
-//może da radę bez @media
-//przemodułować kod
-//queenCaptureForbiddenDirection zlikwidowac
-//check if there are possible moves i funkcja pokazująca pionki które się mogą ruszyć jakoś scalić

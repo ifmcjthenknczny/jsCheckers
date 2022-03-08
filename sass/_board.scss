@@ -1,0 +1,48 @@
+.board {
+    display: grid;
+    grid-template-columns: 0.2fr repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr) 0.2fr;
+    grid-auto-flow: row;
+    width: $boardSizeHorizontal;
+    height: $boardSizeHorizontal;
+}
+
+.grid__square {
+    border: .8px solid $borderColor;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &--black {
+        background-color: $blackSquareColor;
+    }
+
+    &--white {
+        background-color: $whiteSquareColor;
+    }
+
+    &--name {
+        text-align: center;
+        font-weight: 700;
+        font-size: 1rem;
+        font-family: $secondaryFont;
+
+        &-col {
+            text-transform: uppercase;
+        }
+
+        &-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+}
+
+@media (max-width: 700px) {
+    .board {
+        width: $boardSizeVertical;
+        height: $boardSizeVertical;
+    }
+}

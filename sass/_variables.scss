@@ -1,0 +1,27 @@
+$boardSizeVertical: 90vw;
+$boardSizeHorizontal: 80vh;
+$nameSquareSizeVertical: 20 / 740 * $boardSizeVertical;
+$nameSquareSizeHorizontal: 20 / 740 * $boardSizeHorizontal;
+// $pieceBorderThickness: clamp(1.2px, 120vmin * 0.0017, 2.2px);
+// $secondaryBorderThickness: clamp(0.8px, 120vmin * 0.0012, 1.5px);
+// $thirdBorderThickness: clamp(0.5px, $boardSizeVertical * 0.0007, 0.8px);
+
+$pieceSize: (2/3) * 100%;
+
+$minipieceSize: 6px;
+
+$globalFont: 'Segoe UI',
+Tahoma,
+Geneva,
+Verdana,
+sans-serif;
+$secondaryFont: 'Cousine',
+monospace;
+
+$blackSquareColor: rgba(170, 170, 170, 0.7);
+// $blackSquareColor: rgba(100, 100, 100, 0.7);
+$whiteSquareColor: rgba(255, 255, 255, 0.7);
+$clickedColor: #ea2b2b;
+$borderColor: mix(darkgrey, black, 80%);
+
+$colorTransitionTime: 0.3s;

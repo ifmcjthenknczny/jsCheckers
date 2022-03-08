@@ -1,0 +1,60 @@
+.container {
+    margin-top: 25vh;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    width: 0.85 * $boardSizeHorizontal;
+    // width: 90vw;
+}
+
+.game-title {
+    font-family: 'Fleur De Leah', cursive;
+    align-self: center;
+    font-size: 10rem;
+}
+
+.author {
+    font-family: 'Cookie', cursive;
+    font-size: 1rem;
+    align-self: end;
+    text-decoration: underline;
+}
+
+.question {
+    text-transform: uppercase;
+    font-weight: 650;
+    font-size: 2.8rem;
+    align-self: center;
+    text-align: center;
+    font-family: $secondaryFont;
+    transition: $colorTransitionTime;
+
+    &--hover {
+        &-white {
+            -webkit-text-stroke: 1.5px black;
+            color: white;
+        }
+
+        // &-black {
+        //     -webkit-text-stroke: 3px black;
+        // }
+    }
+}
+
+.button-container {
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+    font-family: $secondaryFont;
+}
+
+@media (max-width: 700px) {
+    .container {
+        width: 0.9 * $boardSizeVertical;
+        margin-top: 30vh;
+    }
+
+    .question {
+        font-size: 3rem;
+    }
+}

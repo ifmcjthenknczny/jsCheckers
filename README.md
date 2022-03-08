@@ -12,7 +12,7 @@
 * [Contact](#contact)
 
 ## General info
-This little responsive webpage-app is allows you to play checkers on 8x8 board with a computer opponent. AI is very basic - computer picks random move from the list of available moves.
+This responsive single-page application allows you to play checkers on 8x8 board with a computer opponent. AI is very basic - computer picks random move from the list of available moves.
 
 [Background source](https://www.toptal.com/designers/subtlepatterns/what-the-hex/)
 
@@ -44,16 +44,15 @@ No setup needed. Just make sure you don't use Internet Explorer. For Android, Go
 * Game reset button.
 
 * Smooth transition of pieces and between windows.
+* Displaying possible captures in case of chained capture before animation finishes.
 
 * Board and surroundings fully generated from scratch with use of Javascript.
 
 To-do list:
-* Responsiveness improvement: borders and button sizes, justifying and aligning.
-* Code readibility improvement.
-* Disable hover effects after game ends.
-* Piece transition and user experience concern.
+* Responsiveness improvement: justifying and aligning.
+* Code readibility and quality improvement.
 * SEO
-
+* Button "Flip board" and "Show legal moves"
 ## Status
 Project is: _in progress_
 

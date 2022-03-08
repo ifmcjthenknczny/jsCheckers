@@ -1,0 +1,30 @@
+.captured-pieces {
+    height: $minipieceSize;
+    margin: $minipieceSize;
+    display: flex;
+    flex-flow: row;
+}
+
+.mini-piece {
+    width: $minipieceSize;
+    height: $minipieceSize;
+    border-radius: 50%;
+    border: .6px solid black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 1px;
+
+    &--white {
+        background-color: white;
+    }
+
+    &--black {
+        background-color: black;
+        border-color: grey;
+    }
+
+    &--queen {
+        background-color: mix(darkgrey,black);
+    }
+}

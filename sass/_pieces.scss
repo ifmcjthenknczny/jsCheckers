@@ -1,0 +1,90 @@
+.piece {
+    width: $pieceSize;
+    height: $pieceSize;
+    border-radius: 50%;
+    border: 2.5px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &--black {
+        background-color: black;
+        border-color: white;
+
+        & .piece--queen-decoration {
+            border-color: white;
+            background-color: mix(darkgrey, black, 50%);
+        }
+
+        &.piece--can-move {
+            background-color: darken(mix(aqua, violet), 10%);
+        }
+
+        & .piece--can-move {
+            background-color: darken(mix(aqua, violet), 10%);
+        }
+    }
+
+    &--white {
+        background-color: white;
+        border-color: black;
+
+        & .piece--queen-decoration {
+            border-color: black;
+            background-color: mix(lightgrey, grey, 70%);
+        }
+
+        &.piece--can-move {
+            background-color: mix(aqua, violet);
+        }
+
+        & .piece--can-move {
+            background-color: darken(mix(aqua, violet), 20%);
+        }
+    }
+
+    &--queen-decoration {
+        border-radius: 50%;
+        width: $pieceSize / 1.5;
+        height: $pieceSize / 1.5;
+        border: 1.5px solid;
+
+        &-won {
+            border-radius: 50%;
+            width: $pieceSize / 1.5;
+            height: $pieceSize / 1.5;
+            border: 1.5px solid;
+            background-color: darken($clickedColor, 25%);
+        }
+    }
+
+    &--won {
+        background-color: darken($clickedColor, 10%);
+        border-color: black;
+    }
+}
+
+.piece-hover:hover .piece--queen-decoration,
+#piece-clicked .piece--queen-decoration,
+.piece-hover:hover .piece--queen-decoration {
+    background-color: darken($clickedColor, 20%);
+    transition: background-color colorTransitionTime;
+}
+
+.piece-hover:hover,
+#piece-clicked,
+.piece-hover:active {
+    background-color: $clickedColor;
+    transition: background-color $colorTransitionTime;
+}
+
+@media (max-width: 700px) {
+
+    .piece {
+        border-width: 1.7px;
+
+        &--queen-decoration {
+            border-width: 1.2px;
+        }
+    }
+}

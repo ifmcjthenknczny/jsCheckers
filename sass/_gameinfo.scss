@@ -1,0 +1,44 @@
+.game-info {
+    display: flex;
+    flex-direction: row;
+    justify-content: end;
+    text-transform: uppercase;
+    font-weight: 550;
+    width: $boardSizeHorizontal;
+    font-size: 1rem;
+
+    &__turn-counter {
+        span {
+            font-weight: 700;
+        }
+    }
+
+    &__who-to-move {
+        margin-right: auto;
+        margin-left: $nameSquareSizeHorizontal;
+
+        span {
+            font-weight: 700;
+            color: black;
+            text-shadow: none;
+
+            &.white {
+                color: white;
+                -webkit-text-stroke: 0.6px black;
+            }
+        }
+    }
+}
+
+@media (max-width: 700px) {
+
+    .game-info {
+        width: $boardSizeVertical;
+        margin-top: 15vh;
+        font-size: 1.4rem;
+
+        &__who-to-move {
+            margin-left: $nameSquareSizeVertical;
+        }
+    }
+}

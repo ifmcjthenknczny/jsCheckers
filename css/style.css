@@ -1,23 +1,75 @@
-html {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  font-size: 20px;
-}
-
-body {
+.container {
+  margin-top: 25vh;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
       -ms-flex-flow: column;
           flex-flow: column;
-  background-image: url(../img/what-the-hex.png);
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  width: 68vh;
+}
+
+.game-title {
+  font-family: 'Fleur De Leah', cursive;
+  -ms-flex-item-align: center;
+      -ms-grid-row-align: center;
+      align-self: center;
+  font-size: 10rem;
+}
+
+.author {
+  font-family: 'Cookie', cursive;
+  font-size: 1rem;
+  -ms-flex-item-align: end;
+      -ms-grid-row-align: end;
+      align-self: end;
+  text-decoration: underline;
+}
+
+.question {
+  text-transform: uppercase;
+  font-weight: 650;
+  font-size: 2.8rem;
+  -ms-flex-item-align: center;
+      -ms-grid-row-align: center;
+      align-self: center;
+  text-align: center;
+  font-family: "Cousine", monospace;
+  -webkit-transition: 0.3s;
+  transition: 0.3s;
+}
+
+.question--hover-white {
+  -webkit-text-stroke: 1.5px black;
+  color: white;
+}
+
+.button-container {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-flow: row;
+          flex-flow: row;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  font-family: "Cousine", monospace;
+}
+
+@media (max-width: 700px) {
+  .container {
+    width: 81vw;
+    margin-top: 30vh;
+  }
+  .question {
+    font-size: 3rem;
+  }
 }
 
 .board {
@@ -76,16 +128,11 @@ body {
           justify-content: center;
 }
 
-.captured-pieces {
-  height: 6px;
-  margin: 6px;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-orient: horizontal;
-  -webkit-box-direction: normal;
-      -ms-flex-flow: row;
-          flex-flow: row;
+@media (max-width: 700px) {
+  .board {
+    width: 90vw;
+    height: 90vw;
+  }
 }
 
 .button {
@@ -112,6 +159,7 @@ body {
   background-color: #ea2b2b;
   color: white;
   font-weight: 900;
+  font-size: 26px;
 }
 
 .button--color {
@@ -138,50 +186,109 @@ body {
   font-size: 1.8rem;
 }
 
-.container {
-  margin-top: 25vh;
+@media (max-width: 700px) {
+  .button--color {
+    width: 30vw;
+    height: 45px;
+  }
+  .button--white {
+    background-color: white;
+    font-weight: 900;
+    font-size: 1.8rem;
+  }
+  .button--black {
+    background-color: black;
+    font-weight: 900;
+    color: white;
+    font-size: 1.8rem;
+  }
+  .button--reset {
+    width: 80px;
+    height: 35px;
+    font-size: 16px;
+    border-radius: 8px;
+  }
+}
+
+.game-info {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: end;
+  text-transform: uppercase;
+  font-weight: 550;
+  width: 80vh;
+  font-size: 1rem;
+}
+
+.game-info__turn-counter span {
+  font-weight: 700;
+}
+
+.game-info__who-to-move {
+  margin-right: auto;
+  margin-left: 2.16216vh;
+}
+
+.game-info__who-to-move span {
+  font-weight: 700;
+  color: black;
+  text-shadow: none;
+}
+
+.game-info__who-to-move span.white {
+  color: white;
+  -webkit-text-stroke: 0.6px black;
+}
+
+@media (max-width: 700px) {
+  .game-info {
+    width: 90vw;
+    margin-top: 15vh;
+    font-size: 1.4rem;
+  }
+  .game-info__who-to-move {
+    margin-left: 2.43243vw;
+  }
+}
+
+html {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 20px;
+}
+
+body {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
       -ms-flex-flow: column;
           flex-flow: column;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  width: 64vh;
+  background-image: url(../img/what-the-hex.png);
 }
 
-.game-title {
-  font-family: 'Fleur De Leah', cursive;
-  -ms-flex-item-align: center;
-      -ms-grid-row-align: center;
-      align-self: center;
-  font-size: 10rem;
+@media (max-width: 700px) {
+  html {
+    font-size: clamp(10px, 2.43243vw, 20px);
+  }
 }
 
-.author {
-  font-family: 'Cookie', cursive;
-  font-size: 1rem;
-  -ms-flex-item-align: end;
-      -ms-grid-row-align: end;
-      align-self: end;
-  text-decoration: underline;
-}
-
-.question {
-  text-transform: uppercase;
-  font-weight: 650;
-  font-size: 2.8rem;
-  -ms-flex-item-align: center;
-      -ms-grid-row-align: center;
-      align-self: center;
-  text-align: center;
-  font-family: "Cousine", monospace;
-}
-
-.button-container {
+.captured-pieces {
+  height: 6px;
+  margin: 6px;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -189,10 +296,50 @@ body {
   -webkit-box-direction: normal;
       -ms-flex-flow: row;
           flex-flow: row;
-  -webkit-box-pack: justify;
-      -ms-flex-pack: justify;
-          justify-content: space-between;
-  font-family: "Cousine", monospace;
+}
+
+.mini-piece {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: .6px solid black;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  margin: 1px;
+}
+
+.mini-piece--white {
+  background-color: white;
+}
+
+.mini-piece--black {
+  background-color: black;
+  border-color: grey;
+}
+
+.mini-piece--queen {
+  background-color: #555555;
+}
+
+.legal-move {
+  width: 33.33333%;
+  height: 33.33333%;
+  border-radius: 50%;
+  background-color: #77c1f7;
+  border: 1.5px solid black;
+}
+
+@media (max-width: 700px) {
+  .legal-move {
+    border-width: 1.2px;
+  }
 }
 
 .piece {
@@ -254,38 +401,17 @@ body {
   border: 1.5px solid;
 }
 
-.piece--won {
-  background-color: #ea2b2b;
-}
-
-.mini-piece {
-  width: 6px;
-  height: 6px;
+.piece--queen-decoration-won {
   border-radius: 50%;
-  border: .6px solid black;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  margin: 1px;
+  width: 44.44444%;
+  height: 44.44444%;
+  border: 1.5px solid;
+  background-color: #880d0d;
 }
 
-.mini-piece--white {
-  background-color: white;
-}
-
-.mini-piece--black {
-  background-color: black;
-  border-color: grey;
-}
-
-.mini-piece--queen {
-  background-color: darkgrey;
+.piece--won {
+  background-color: #ce1414;
+  border-color: black;
 }
 
 .piece-hover:hover .piece--queen-decoration,
@@ -304,102 +430,11 @@ body {
   transition: background-color 0.3s;
 }
 
-.legal-move {
-  width: 33.33333%;
-  height: 33.33333%;
-  border-radius: 50%;
-  background-color: #77c1f7;
-  border: 1.5px solid black;
-}
-
-.game-info {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-orient: horizontal;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: row;
-          flex-direction: row;
-  -webkit-box-pack: end;
-      -ms-flex-pack: end;
-          justify-content: end;
-  text-transform: uppercase;
-  font-weight: 550;
-  width: 80vh;
-  font-size: 1rem;
-}
-
-.game-info__turn-counter span {
-  font-weight: 700;
-}
-
-.game-info__who-to-move {
-  margin-right: auto;
-  margin-left: 2.16216vh;
-}
-
-.game-info__who-to-move span {
-  font-weight: 700;
-  color: black;
-  text-shadow: none;
-}
-
-.game-info__who-to-move span.white {
-  color: white;
-  -webkit-text-stroke: 0.6px black;
-}
-
 @media (max-width: 700px) {
-  html {
-    font-size: clamp(10px, 2.43243vw, 20px);
-  }
-  .board {
-    width: 90vw;
-    height: 90vw;
-  }
   .piece {
     border-width: 1.7px;
   }
   .piece--queen-decoration {
-    border-width: 1.2px;
-  }
-  .game-info {
-    width: 90vw;
-    margin-top: 15vh;
-    font-size: 1.4rem;
-  }
-  .game-info__who-to-move {
-    margin-left: 2.43243vw;
-  }
-  .container {
-    width: 81vw;
-    margin-top: 30vh;
-  }
-  .question {
-    font-size: 3rem;
-  }
-  .button--color {
-    width: 30vw;
-    height: 45px;
-  }
-  .button--white {
-    background-color: white;
-    font-weight: 900;
-    font-size: 1.8rem;
-  }
-  .button--black {
-    background-color: black;
-    font-weight: 900;
-    color: white;
-    font-size: 1.8rem;
-  }
-  .button--reset {
-    width: 80px;
-    height: 35px;
-    font-size: 16px;
-    border-radius: 8px;
-  }
-  .legal-move {
     border-width: 1.2px;
   }
 }
