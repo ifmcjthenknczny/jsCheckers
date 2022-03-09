@@ -57,6 +57,7 @@
         font-family: $secondaryFont;
         justify-content: space-between;
     }
+
     &--game {
         width: $boardSizeHorizontal;
         justify-content: space-around;
@@ -88,7 +89,7 @@
         &--game {
             width: 100px;
             height: 40px;
-            font-size: 16px;
+            font-size: 14px;
             border-radius: 8px;
         }
 
