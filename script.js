@@ -168,6 +168,7 @@ async function fadeIn(elementSelector, time) {
 }
 
 async function movePiece(startSquare, targetSquare, transitionTimeMs) {
+    flipBoardBlock = true;
     const pieceToMove = startSquare.firstChild;
     const [startCol, startRow] = startSquare.id;
     const [targetCol, targetRow] = targetSquare.id;
@@ -210,6 +211,7 @@ async function movePiece(startSquare, targetSquare, transitionTimeMs) {
     pieceToMove.style.position = '';
     pieceToMove.style.width = '';
     pieceToMove.style.height = '';
+    flipBoardBlock = false;
 }
 
 
@@ -248,13 +250,14 @@ function crownTheQueen(piece) {
 
 function removeCapturedPiece(square) {
     const isQueen = square.firstChild.classList.contains('piece--queen');
+    const isPieceWhite = square.firstChild.classList.contains('piece--white');
     square.firstChild.remove();
 
     const pieceMini = document.createElement('div');
     if (isQueen) pieceMini.classList.add('mini-piece--queen');
     else lastMoveBlack ? pieceMini.classList.add('mini-piece--black') : pieceMini.classList.add('mini-piece--white');
-    pieceMini.classList.add('mini-piece')
-    const targetGraveyard = ((!lastMoveBlack && whiteOnBottom) || lastMoveBlack && !whiteOnBottom) ? '.captured-pieces--top' : '.captured-pieces--bottom';
+    pieceMini.classList.add('mini-piece');
+    const targetGraveyard = ((isPieceWhite && whiteOnBottom) || !isPieceWhite && !whiteOnBottom) ? '.captured-pieces--top' : '.captured-pieces--bottom';
     document.querySelector(targetGraveyard).appendChild(pieceMini);
 }
 
@@ -504,10 +507,10 @@ function generateBoard() {
             square.classList.add('grid__square');
             square.setAttribute('id', nameOfSquare);
             if (whiteSquare) {
-                square.classList.add('grid__square--white', 'grid__square--whiteClicked');
+                square.classList.add('grid__square--white');
                 square.addEventListener('click', pieceUnhold);
             } else {
-                square.classList.add('grid__square--black', 'grid__square--blackClicked');
+                square.classList.add('grid__square--black');
                 square.addEventListener('click', makeAMove);
             }
             whiteSquare = !whiteSquare;
@@ -522,7 +525,7 @@ function generateBoard() {
         grid.append(squareWithName);
     }
     main.appendChild(grid);
-    document.body.appendChild(main);
+    document.body.insertBefore(main, document.querySelector('.captured-pieces--bottom'));
 }
 
 function generateStartingPosition() {
@@ -535,7 +538,7 @@ function generateStartingPosition() {
         piece.classList.add('piece-hover');
         if (i < 3 * 4) {
             piece.classList.add(order[0]);
-            // piece.addEventListener('transitionend', () => blockBoard = false)
+            piece.addEventListener('click', pieceUnhold);
         } else if (i >= 5 * 4) {
             piece.classList.add(order[1]);
             piece.addEventListener('click', pieceHold);
@@ -545,8 +548,11 @@ function generateStartingPosition() {
 }
 
 function generateButtons() {
+    const buttonContainer = document.createElement('section');
+    buttonContainer.classList.add('button-container', 'button-container--game');
+
     const resetButton = document.createElement('button');
-    resetButton.classList.add('button', 'button--reset');
+    resetButton.classList.add('button', 'button--reset', 'button--game');
     resetButton.innerText = 'restart';
     resetButton.addEventListener("click", () => {
         document.body.innerHTML = '';
@@ -559,7 +565,15 @@ function generateButtons() {
         queenCaptureForbiddenDirection = [null, null];
         generateFirstQuestion();
     });
-    document.body.appendChild(resetButton);
+
+    const flipButton = document.createElement('button');
+    flipButton.classList.add('button', 'button--flip', 'button--game');
+    flipButton.innerText = 'flip board';
+    flipButton.addEventListener("click", flipBoard);
+
+    buttonContainer.appendChild(resetButton);
+    buttonContainer.appendChild(flipButton);
+    document.body.appendChild(buttonContainer);
 }
 
 function generateGraveyards() {
@@ -568,9 +582,8 @@ function generateGraveyards() {
     for (let graveyard of [graveyardTop, graveyardBottom]) graveyard.classList.add('captured-pieces');
     graveyardTop.classList.add('captured-pieces--top');
     graveyardBottom.classList.add('captured-pieces--bottom');
-    const main = document.querySelector('main');
-    document.body.insertBefore(graveyardTop, main);
-    document.body.insertBefore(graveyardBottom, main.nextSibling);
+    document.body.appendChild(graveyardTop);
+    document.body.appendChild(graveyardBottom);
 }
 
 function generateGameInfo() {
@@ -617,7 +630,7 @@ function generateFirstQuestion() {
     question.classList.add("question");
     question.innerText = 'choose your color';
     const buttons = document.createElement('section');
-    buttons.classList.add('button-container');
+    buttons.classList.add('button-container','button-container--question');
     const buttonWhite = document.createElement('button');
     buttonWhite.classList.add('button--white', 'button', 'button--color');
     buttonWhite.innerText = 'white';
@@ -638,7 +651,7 @@ function generateFirstQuestion() {
         startGame();
     })
 
-    for (let event of ['mouseover', 'mouseout']) {
+    for (let event of ['mouseover', 'mouseout', 'activate', 'deactivate']) {
         buttonWhite.addEventListener(event, () => {
             const question = document.querySelector('.question');
             question.classList.toggle('question--hover-white');
@@ -661,9 +674,40 @@ function generateFirstQuestion() {
     fadeIn('.container', 800);
 }
 
-async function startGame() {
+function flipBoard() {
+    if (flipBoardBlock) return;
+    const boardElements = [...document.querySelector(".board").children];
+    const boardState = []
+    for (let element of boardElements) {
+        if (element.classList.contains('grid__square')) {
+            if (!!element.firstChild) boardState.push(element.firstChild.cloneNode(true));
+            else boardState.push(false);
+        }
+    }
+    document.querySelector('.board').remove();
+    boardState.reverse();
+    whiteOnBottom = !whiteOnBottom;
     generateBoard();
+    const newBoard = [...document.querySelector(".board").children].filter(child => child.classList.contains('grid__square'));
+    for (let i = 0; i < boardState.length; i++) {
+        if (boardState[i]) {
+            const clickFunction = ((playWhite && boardState[i].classList.contains('piece--white')) || (!playWhite && boardState[i].classList.contains('piece--black'))) ? pieceHold : pieceUnhold;
+            boardState[i].addEventListener('click', clickFunction);
+            newBoard[i].appendChild(boardState[i]);
+        }
+    }
+    const graveyardTopState = [...document.querySelector('.captured-pieces--top').cloneNode(true).children];
+    const graveyardBottomState = [...document.querySelector('.captured-pieces--bottom').cloneNode(true).children];
+    for (let minipiece of document.querySelectorAll('.mini-piece')) minipiece.remove();
+    const newGraveyardTop = document.querySelector('.captured-pieces--top');
+    const newGraveyardBottom = document.querySelector('.captured-pieces--bottom');
+    for (let minipiece of graveyardTopState) newGraveyardBottom.appendChild(minipiece);
+    for (let minipiece of graveyardBottomState) newGraveyardTop.appendChild(minipiece);
+}
+
+async function startGame() {
     generateGraveyards();
+    generateBoard();
     generateButtons();
     generateGameInfo();
     generateStartingPosition();
@@ -686,5 +730,6 @@ let whiteOnBottom = true;
 let onlyQueenMovesWithoutCapture = 0;
 let chainedCapturePiece = null;
 let queenCaptureForbiddenDirection = [null, null];
+let flipBoardBlock = false;
 const moveAnimationDurationMs = 600;
 generateTitleWindow();

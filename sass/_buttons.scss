@@ -9,7 +9,7 @@
     font-weight: 550;
     border: 1.5px solid black;
 
-    &--reset {
+    &--game {
         margin-top: $minipieceSize / 2;
         border-radius: 12px;
         font-weight: 650;
@@ -19,8 +19,8 @@
         &:active {
             background-color: $clickedColor;
             color: white;
-            font-weight: 900;
-            font-size: 26px;
+            // font-weight: 900;
+            // font-size: 26px;
         }
     }
 
@@ -49,6 +49,20 @@
     }
 }
 
+.button-container {
+    display: flex;
+    flex-flow: row;
+
+    &--question {
+        font-family: $secondaryFont;
+        justify-content: space-between;
+    }
+    &--game {
+        width: $boardSizeHorizontal;
+        justify-content: space-around;
+    }
+}
+
 @media (max-width: 700px) {
     .button {
         &--color {
@@ -71,11 +85,17 @@
             font-size: 1.8rem;
         }
 
-        &--reset {
-            width: 80px;
-            height: 35px;
+        &--game {
+            width: 100px;
+            height: 40px;
             font-size: 16px;
             border-radius: 8px;
+        }
+
+        &-container--game {
+            // flex-flow: end;
+            // justify-content: center;
+            width: $boardSizeVertical;
         }
     }
 }

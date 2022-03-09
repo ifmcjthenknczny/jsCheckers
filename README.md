@@ -26,7 +26,7 @@ This responsive single-page application allows you to play checkers on 8x8 board
 ## Technologies
 * HTML5
 * Sass
-* Javascript
+* Vanilla Javascript
 
 ## Setup
 No setup needed. Just make sure you don't use Internet Explorer. For Android, Google Chrome is recommended.
@@ -52,7 +52,9 @@ To-do list:
 * Responsiveness improvement: justifying and aligning.
 * Code readibility and quality improvement.
 * SEO
-* Button "Flip board" and "Show legal moves"
+* Button "Show legal moves"
+* Computer AI slight improvment (concerning queen moves and best captures)
+* Small bug fix (after flipping the board, pieces sometimes don't move on the first click)
 ## Status
 Project is: _in progress_
 
