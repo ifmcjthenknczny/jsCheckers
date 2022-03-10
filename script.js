@@ -283,74 +283,52 @@ function isThereACapturePossibility() {
 }
 
 function legalCapturesOfPiece(piece) {
-    const pieceSquare = piece.parentElement.id;
-    let [pieceCol, pieceRow] = pieceSquare;
-    pieceRow = +pieceRow;
-    const isPieceWhite = piece.classList.contains('piece--white');
+    const startingSquare = piece.parentElement;
+    let [startingCol, startingRow] = startingSquare.id;
 
-    const captureCandidates = [];
-    const capturesPossible = [];
+    const isWhite = piece.classList.contains('piece--white') ? true : false;
+    const classOfPiece = isWhite ? 'piece--white' : 'piece--black';
+    const classToCapture = isWhite ? 'piece--black' : 'piece--white';
+    const isQueen = piece.classList.contains('piece--queen') ? true : false;
 
-    const colorCoeff = isPieceWhite ? 1 : -1;
-    const rowOrder = isPieceWhite ? [...rows] : [...rows].reverse();
+    const possibleSquares = [];
 
-    if (!piece.classList.contains('piece--queen')) {
-        if (pieceCol !== cols[cols.length - 2] && pieceCol !== cols[cols.length - 1]) {
-            if (pieceRow !== rowOrder[rowOrder.length - 2] && pieceRow !== rowOrder[rowOrder.length - 1]) captureCandidates.push(`${cols[cols.indexOf(pieceCol)+2]}${pieceRow+2*colorCoeff}`);
-            if (pieceRow !== rowOrder[0] && pieceRow !== rowOrder[1]) captureCandidates.push(`${cols[cols.indexOf(pieceCol)+2]}${pieceRow-2*colorCoeff}`);
-        }
-        if (pieceCol !== cols[0] && pieceCol !== cols[1]) {
-            if (pieceRow !== rowOrder[rowOrder.length - 2] && pieceRow !== rowOrder[rowOrder.length - 1]) captureCandidates.push(`${cols[cols.indexOf(pieceCol)-2]}${pieceRow+2*colorCoeff}`);
-            if (pieceRow !== rowOrder[0] && pieceRow !== rowOrder[1]) captureCandidates.push(`${cols[cols.indexOf(pieceCol)-2]}${pieceRow-2*colorCoeff}`);
-        }
-        //checks if target square is not occupied and there is a piece to capture
-        for (let captureCandidate of captureCandidates) {
-            const targetSquare = document.querySelector(`#${captureCandidate}`);
-            const isLegalTargetSquare = targetSquare.firstElementChild ? !targetSquare.firstElementChild.classList.contains('piece') : true;
-            if (isLegalTargetSquare && !!findSquareOfAPieceToCapture(pieceSquare, captureCandidate)) capturesPossible.push(targetSquare);
-        }
-    } else {
-        for (let colsUp of [true, false]) {
-            for (let rowsUp of [true, false]) {
-                if (!(colsUp === queenCaptureForbiddenDirection[0] && rowsUp === queenCaptureForbiddenDirection[1])) capturesPossible.push(...diagonalQueenCaptures(pieceSquare, colsUp, rowsUp));
+    for (let rowsIncrease of [true, false]) {
+        for (let colsIncrease of [true, false]) {
+            const colBoundary = colsIncrease ? cols.length - 1 : 0;
+            const rowBoundary = rowsIncrease ? rows.length - 1 : 0;
+            const deltaCol = colsIncrease ? 1 : -1;
+            const deltaRow = rowsIncrease ? 1 : -1;
+            let colIndex = cols.indexOf(startingCol) + deltaCol;
+            let rowIndex = rows.indexOf(+startingRow) + deltaRow;
+            let thereIsPieceToCapture = false;
+            let normalPieceIterator = 0;
+
+            while (rowIndex !== rowBoundary + deltaRow && colIndex !== colBoundary + deltaCol) {
+                // loops over diagonal in specified direction by colsIncrease and rowsIncrease
+                // breaks the loop if it finds piece of the same color
+                // if it finds first piece of opposite color, thereIsPieceToCapture is changed to true
+                // when thereIsPieceToCapture is true, every free square is added to array which is later returned
+                // breaks the loop if it finds another piece
+                const squareName = `${cols[colIndex]}${rowIndex+1}`;
+                const square = document.querySelector(`#${squareName}`);
+                const isSquareTaken = !!square.firstChild && square.firstChild.classList.contains('piece')
+
+                if (isSquareTaken) {
+                    if (thereIsPieceToCapture) break;
+                    else if (square.firstChild.classList.contains(classToCapture)) thereIsPieceToCapture = true;
+                    else if (square.firstChild.classList.contains(classOfPiece)) break;
+                } else if (!isSquareTaken && thereIsPieceToCapture) possibleSquares.push(square);
+
+                if (!isQueen) {
+                    normalPieceIterator++;
+                    if (normalPieceIterator === 2) break;
+                }
+
+                colIndex += deltaCol;
+                rowIndex += deltaRow;
             }
         }
-    }
-    return capturesPossible
-}
-
-function diagonalQueenCaptures(startingSquare, colsIncrease, rowsIncrease) {
-    const classToCapture = whiteMove ? 'piece--black' : 'piece--white';
-    const classOfQueen = whiteMove ? 'piece--white' : 'piece--black';
-
-    let [startingCol, startingRow] = startingSquare;
-    const possibleSquares = [];
-    const colBoundary = colsIncrease ? cols.length - 1 : 0;
-    const rowBoundary = rowsIncrease ? rows.length - 1 : 0;
-    const deltaCol = colsIncrease ? 1 : -1;
-    const deltaRow = rowsIncrease ? 1 : -1;
-    let colIndex = cols.indexOf(startingCol) + deltaCol;
-    let rowIndex = rows.indexOf(+startingRow) + deltaRow;
-    let thereIsPieceToCapture = false;
-
-    while (rowIndex !== rowBoundary + deltaRow && colIndex !== colBoundary + deltaCol) {
-        // loops over diagonal in specified direction by colsIncrease and rowsIncrease
-        // breaks the loop if it finds piece of the same color
-        // if it finds first piece of opposite color, thereIsPieceToCapture is changed to true
-        // when thereIsPieceToCapture is true, every free square is added to array which is later returned
-        // breaks the loop if it finds another piece
-        const squareName = `${cols[colIndex]}${rowIndex+1}`;
-        const square = document.querySelector(`#${squareName}`);
-        const isSquareTaken = !!square.firstChild && square.firstChild.classList.contains('piece')
-
-        if (isSquareTaken) {
-            if (thereIsPieceToCapture) break;
-            else if (square.firstChild.classList.contains(classToCapture)) thereIsPieceToCapture = true;
-            else if (square.firstChild.classList.contains(classOfQueen)) break;
-        } else if (!isSquareTaken && thereIsPieceToCapture) possibleSquares.push(square);
-
-        colIndex += deltaCol;
-        rowIndex += deltaRow;
     }
     return possibleSquares
 }
@@ -376,9 +354,9 @@ function legalNormalMovesOfPiece(piece) {
             while (rowIndex !== rowBoundary + deltaRow && colIndex !== colBoundary + deltaCol) {
                 const squareName = `${cols[colIndex]}${rowIndex+1}`;
                 const square = document.querySelector(`#${squareName}`);
-                if (!!square.firstChild) {
-                    if (square.firstChild.classList.contains('piece')) break;
-                } else possibleSquares.push(square);
+                const isSquareTaken = !!square.firstChild && square.firstChild.classList.contains('piece');
+                if (isSquareTaken) break;
+                else possibleSquares.push(square);
                 if (!isQueen) break;
                 colIndex += deltaCol;
                 rowIndex += deltaRow;
@@ -675,6 +653,7 @@ function flipBoard() {
             newBoard[i].appendChild(boardState[i]);
         }
     }
+
     const graveyardTopState = [...document.querySelector('.captured-pieces--top').cloneNode(true).children];
     const graveyardBottomState = [...document.querySelector('.captured-pieces--bottom').cloneNode(true).children];
     for (let minipiece of document.querySelectorAll('.mini-piece')) minipiece.remove();
