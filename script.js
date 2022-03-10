@@ -126,7 +126,7 @@ async function computerMove() {
 }
 
 function endTurn() {
-    lastMoveBlack = !lastMoveBlack;
+    whiteMove = !whiteMove;
     if (endOfGame()) congratsToWinner();
     else {
         changeGameInfo();
@@ -135,7 +135,7 @@ function endTurn() {
 }
 
 function isComputerTurn() {
-    if ((playWhite && !lastMoveBlack) || !playWhite && lastMoveBlack) return true
+    if ((playWhite && !whiteMove) || !playWhite && whiteMove) return true
     return false
 }
 
@@ -143,7 +143,7 @@ function changeGameInfo() {
     const whoToMove = document.querySelector('.game-info__who-to-move span');
     whoToMove.classList.toggle('white');
 
-    if (lastMoveBlack) {
+    if (whiteMove) {
         document.querySelector('.game-info__turn-counter span').innerText = ++turn;
         whoToMove.innerText = 'White';
     } else {
@@ -176,7 +176,7 @@ async function movePiece(startSquare, targetSquare, transitionTimeMs) {
     const [startRowIndex, targetRowIndex] = [startRow, targetRow].map(x => +x - 1);
     const squareWidth = parseInt(window.getComputedStyle(document.querySelector('.grid__square')).width, 10) + 2 * parseInt(((window.getComputedStyle(document.querySelector('.grid__square')).border).split(' '))[0], 10);
 
-    const boardPositionCoeff = whiteOnBottom ? 1 : -1;
+    const boardPositionCoeff = whitesOnBottom ? 1 : -1;
     const transX = (targetColIndex - startColIndex) * squareWidth * boardPositionCoeff;
     const transY = (startRowIndex - targetRowIndex) * squareWidth * boardPositionCoeff;
     const {
@@ -255,23 +255,21 @@ function removeCapturedPiece(square) {
 
     const pieceMini = document.createElement('div');
     if (isQueen) pieceMini.classList.add('mini-piece--queen');
-    else lastMoveBlack ? pieceMini.classList.add('mini-piece--black') : pieceMini.classList.add('mini-piece--white');
+    else whiteMove ? pieceMini.classList.add('mini-piece--black') : pieceMini.classList.add('mini-piece--white');
     pieceMini.classList.add('mini-piece');
-    const targetGraveyard = ((isPieceWhite && whiteOnBottom) || !isPieceWhite && !whiteOnBottom) ? '.captured-pieces--top' : '.captured-pieces--bottom';
+    const targetGraveyard = ((isPieceWhite && whitesOnBottom) || !isPieceWhite && !whitesOnBottom) ? '.captured-pieces--top' : '.captured-pieces--bottom';
     document.querySelector(targetGraveyard).appendChild(pieceMini);
 }
 
 function promotion(piece) {
     if (piece.classList.contains('piece--queen')) return false;
     const [, clickedPieceRow] = piece.parentElement.id;
-    if ((lastMoveBlack && clickedPieceRow === '8') || (!lastMoveBlack && clickedPieceRow === '1')) {
-        return true
-    }
+    if ((whiteMove && clickedPieceRow === '8') || (!whiteMove && clickedPieceRow === '1')) return true
     return false
 }
 
 function isThereACapturePossibility() {
-    const selector = lastMoveBlack ? '.piece--white' : '.piece--black';
+    const selector = whiteMove ? '.piece--white' : '.piece--black';
     const allColorPieces = document.querySelectorAll(selector);
 
     for (let piece of allColorPieces) {
@@ -321,41 +319,9 @@ function legalCapturesOfPiece(piece) {
     return capturesPossible
 }
 
-function legalNormalMovesOfPiece(piece) {
-    let [pieceCol, pieceRow] = piece.parentElement.id;
-    pieceRow = +pieceRow;
-    const isPieceWhite = piece.classList.contains('piece--white');
-    const isPieceQueen = piece.classList.contains('piece--queen');
-
-    let normalMoveCandidates = [];
-    let normalMovesPossible = [];
-
-    const colorCoeff = isPieceWhite ? 1 : -1;
-    const rowOrder = isPieceWhite ? [...rows] : [...rows].reverse();
-
-    if (!isPieceQueen) {
-        if (pieceRow !== rowOrder[rowOrder.length - 1]) {
-            if (pieceCol !== cols[0]) normalMoveCandidates.push(`${cols[cols.indexOf(pieceCol)-1]}${pieceRow+colorCoeff}`);
-            if (pieceCol !== cols[cols.length - 1]) normalMoveCandidates.push(`${cols[cols.indexOf(pieceCol)+1]}${pieceRow+colorCoeff}`);
-        }
-        //checks if square is not occupied by another piece
-        for (let normalMoveCandidate of normalMoveCandidates) {
-            const targetSquare = document.querySelector(`#${normalMoveCandidate}`);
-            if (!targetSquare.firstElementChild) normalMovesPossible.push(targetSquare);
-        }
-    } else {
-        for (let colsUp of [true, false]) {
-            for (let rowsUp of [true, false]) {
-                normalMovesPossible.push(...diagonalQueenMoves(piece.parentElement.id, colsUp, rowsUp));
-            }
-        }
-    }
-    return normalMovesPossible
-}
-
 function diagonalQueenCaptures(startingSquare, colsIncrease, rowsIncrease) {
-    const classToCapture = lastMoveBlack ? 'piece--black' : 'piece--white';
-    const classOfQueen = lastMoveBlack ? 'piece--white' : 'piece--black';
+    const classToCapture = whiteMove ? 'piece--black' : 'piece--white';
+    const classOfQueen = whiteMove ? 'piece--white' : 'piece--black';
 
     let [startingCol, startingRow] = startingSquare;
     const possibleSquares = [];
@@ -389,23 +355,35 @@ function diagonalQueenCaptures(startingSquare, colsIncrease, rowsIncrease) {
     return possibleSquares
 }
 
-function diagonalQueenMoves(startingSquare, colsIncrease, rowsIncrease) {
-    let [startingCol, startingRow] = startingSquare;
+function legalNormalMovesOfPiece(piece) {
+    const startingSquare = piece.parentElement;
+    let [startingCol, startingRow] = startingSquare.id;
+    const isQueen = (piece.classList.contains('piece--queen')) ? true : false;
+    const isWhite = (piece.classList.contains('piece--white')) ? true : false;
+
+    const rowsIncreasePossible = isQueen ? [true, false] : (isWhite ? [true] : [false]);
+    const colsIncreasePossible = [true, false]
+
     const possibleSquares = [];
-    const colBoundary = colsIncrease ? cols.length - 1 : 0;
-    const rowBoundary = rowsIncrease ? rows.length - 1 : 0;
-    const deltaCol = colsIncrease ? 1 : -1;
-    const deltaRow = rowsIncrease ? 1 : -1;
-    let rowIndex = rows.indexOf(+startingRow) + deltaRow;
-    let colIndex = cols.indexOf(startingCol) + deltaCol;
-    while (rowIndex !== rowBoundary + deltaRow && colIndex !== colBoundary + deltaCol) {
-        const squareName = `${cols[colIndex]}${rowIndex+1}`;
-        const square = document.querySelector(`#${squareName}`);
-        if (!!square.firstChild) {
-            if (square.firstChild.classList.contains('piece')) return possibleSquares;
-        } else possibleSquares.push(square);
-        colIndex += deltaCol;
-        rowIndex += deltaRow;
+    for (let rowsIncrease of rowsIncreasePossible) {
+        for (let colsIncrease of colsIncreasePossible) {
+            const colBoundary = colsIncrease ? cols.length - 1 : 0;
+            const rowBoundary = rowsIncrease ? rows.length - 1 : 0;
+            const deltaCol = colsIncrease ? 1 : -1;
+            const deltaRow = rowsIncrease ? 1 : -1;
+            let rowIndex = rows.indexOf(+startingRow) + deltaRow;
+            let colIndex = cols.indexOf(startingCol) + deltaCol;
+            while (rowIndex !== rowBoundary + deltaRow && colIndex !== colBoundary + deltaCol) {
+                const squareName = `${cols[colIndex]}${rowIndex+1}`;
+                const square = document.querySelector(`#${squareName}`);
+                if (!!square.firstChild) {
+                    if (square.firstChild.classList.contains('piece')) break;
+                } else possibleSquares.push(square);
+                if (!isQueen) break;
+                colIndex += deltaCol;
+                rowIndex += deltaRow;
+            }
+        }
     }
     return possibleSquares
 }
@@ -419,7 +397,7 @@ function findSquareOfAPieceToCapture(originalSquare, targetSquare) {
     const [targetCol, targetRow] = targetSquare;
     const rowIterable = createDiagonalIterable(rows.indexOf(+originalRow), rows.indexOf(+targetRow));
     const colIterable = createDiagonalIterable(cols.indexOf(originalCol), cols.indexOf(targetCol));
-    const classToCapture = lastMoveBlack ? 'piece--black' : 'piece--white';
+    const classToCapture = whiteMove ? 'piece--black' : 'piece--white';
     let i = 0;
 
     while (i < rowIterable.length) {
@@ -437,7 +415,7 @@ function findSquareOfAPieceToCapture(originalSquare, targetSquare) {
 function congratsToWinner() {
     const whoToMove = document.querySelector(".game-info__who-to-move");
     if (onlyQueenMovesWithoutCapture >= 30) whoToMove.innerHTML = 'It is a <span>Draw</span>!';
-    else if (lastMoveBlack) whoToMove.innerHTML = '<span>Black</span> won!';
+    else if (whiteMove) whoToMove.innerHTML = '<span>Black</span> won!';
     else whoToMove.innerHTML = '<span class="white">White</span> won!';
 
     const allPieces = [...document.querySelectorAll('.piece')];
@@ -455,7 +433,7 @@ function congratsToWinner() {
 }
 
 function endOfGame() {
-    const selector = lastMoveBlack ? ".piece--white" : ".piece--black";
+    const selector = whiteMove ? ".piece--white" : ".piece--black";
     const stillPieces = (document.querySelectorAll(selector)).length;
     if (stillPieces === 0) return true;
     if (!checkIfThereArePossibleMoves()) return true;
@@ -464,7 +442,7 @@ function endOfGame() {
 }
 
 function checkIfThereArePossibleMoves() {
-    const selector = lastMoveBlack ? ".piece--white" : ".piece--black";
+    const selector = whiteMove ? ".piece--white" : ".piece--black";
     const allColorPieces = [...document.querySelectorAll(selector)];
     const legalNormalMoves = allColorPieces.map(p => legalNormalMovesOfPiece(p).length);
     const legalCaptures = allColorPieces.map(p => legalCapturesOfPiece(p).length);
@@ -492,8 +470,8 @@ function generateBoard() {
     const main = document.querySelector('main');
     const grid = document.createElement('section');
     grid.classList.add('board');
-    const rowOrder = whiteOnBottom ? [...rows].reverse() : [...rows];
-    const colOrder = whiteOnBottom ? [...cols] : [...cols].reverse();
+    const rowOrder = whitesOnBottom ? [...rows].reverse() : [...rows];
+    const colOrder = whitesOnBottom ? [...cols] : [...cols].reverse();
 
     for (let rowName of rowOrder) {
         whiteSquare = !whiteSquare;
@@ -531,7 +509,7 @@ function generateBoard() {
 function generateStartingPosition() {
     const blackSquares = document.querySelectorAll(".grid__square--black");
     const order = ['piece--black', 'piece--white'];
-    if (!whiteOnBottom) order.reverse();
+    if (!whitesOnBottom) order.reverse();
     for (let i = 0; i < blackSquares.length; i++) {
         const piece = document.createElement('div');
         piece.classList.add('piece');
@@ -541,7 +519,7 @@ function generateStartingPosition() {
         } else if (i >= 5 * 4) {
             piece.classList.add(order[1]);
             piece.addEventListener('click', pieceHold);
-        piece.classList.add('piece-hover');
+            piece.classList.add('piece-hover');
 
         }
         if (i < 3 * 4 || i >= 5 * 4) blackSquares[i].append(piece);
@@ -558,7 +536,7 @@ function generateButtons() {
     resetButton.addEventListener("click", () => {
         document.body.innerHTML = '';
         document.body.appendChild(document.createElement('main'));
-        lastMoveBlack = true;
+        whiteMove = true;
         turn = 1;
         forcedCapture = false;
         onlyQueenMovesWithoutCapture = 0;
@@ -640,14 +618,14 @@ function generateFirstQuestion() {
     buttonBlack.innerText = 'black';
     buttonWhite.addEventListener('click', () => {
         playWhite = true;
-        whiteOnBottom = true;
+        whitesOnBottom = true;
         main.innerHTML = '';
         startGame();
     })
 
     buttonBlack.addEventListener('click', () => {
         playWhite = false;
-        whiteOnBottom = false;
+        whitesOnBottom = false;
         main.innerHTML = '';
         startGame();
     })
@@ -687,7 +665,7 @@ function flipBoard() {
     }
     document.querySelector('.board').remove();
     boardState.reverse();
-    whiteOnBottom = !whiteOnBottom;
+    whitesOnBottom = !whitesOnBottom;
     generateBoard();
     const newBoard = [...document.querySelector(".board").children].filter(child => child.classList.contains('grid__square'));
     for (let i = 0; i < boardState.length; i++) {
@@ -725,9 +703,9 @@ const cols = 'abcdefgh'.split('');
 const rows = range(8, 1);
 let turn = 1;
 let forcedCapture = false;
-let lastMoveBlack = true;
+let whiteMove = true;
 let playWhite = true;
-let whiteOnBottom = true;
+let whitesOnBottom = true;
 let onlyQueenMovesWithoutCapture = 0;
 let chainedCapturePiece = null;
 let queenCaptureForbiddenDirection = [null, null];
