@@ -43,7 +43,7 @@ function highlightPiecesThatCanMove(clickedPiece) {
 }
 
 function unhighlightPiecesThatCanMove() {
-    const piecesToRemoveClass = document.querySelectorAll('.piece--can-move');
+    const piecesToRemoveClass = [...document.querySelectorAll('.piece--can-move')];
     for (let piece of piecesToRemoveClass) piece.classList.remove('piece--can-move');
 }
 
@@ -535,13 +535,14 @@ function generateStartingPosition() {
     for (let i = 0; i < blackSquares.length; i++) {
         const piece = document.createElement('div');
         piece.classList.add('piece');
-        piece.classList.add('piece-hover');
         if (i < 3 * 4) {
             piece.classList.add(order[0]);
             piece.addEventListener('click', pieceUnhold);
         } else if (i >= 5 * 4) {
             piece.classList.add(order[1]);
             piece.addEventListener('click', pieceHold);
+        piece.classList.add('piece-hover');
+
         }
         if (i < 3 * 4 || i >= 5 * 4) blackSquares[i].append(piece);
     }
@@ -630,7 +631,7 @@ function generateFirstQuestion() {
     question.classList.add("question");
     question.innerText = 'choose your color';
     const buttons = document.createElement('section');
-    buttons.classList.add('button-container','button-container--question');
+    buttons.classList.add('button-container', 'button-container--question');
     const buttonWhite = document.createElement('button');
     buttonWhite.classList.add('button--white', 'button', 'button--color');
     buttonWhite.innerText = 'white';
