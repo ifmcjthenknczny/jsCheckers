@@ -433,8 +433,21 @@ body {
   background-color: #880d0d;
 }
 
+.piece--queen-decoration-lost {
+  border-radius: 50%;
+  width: 44.44444%;
+  height: 44.44444%;
+  border: 1.5px solid;
+  background-color: rgba(145, 145, 145, 0.7);
+}
+
 .piece--won {
   background-color: #ce1414;
+  border-color: black;
+}
+
+.piece--lost {
+  background-color: rgba(170, 170, 170, 0.7);
   border-color: black;
 }
 

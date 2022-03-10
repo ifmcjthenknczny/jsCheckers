@@ -56,10 +56,21 @@
             border: 1.5px solid;
             background-color: darken($clickedColor, 25%);
         }
+        &-lost {
+            border-radius: 50%;
+            width: $pieceSize / 1.5;
+            height: $pieceSize / 1.5;
+            border: 1.5px solid;
+            background-color: darken($blackSquareColor, 10%);
+        }
     }
 
     &--won {
         background-color: darken($clickedColor, 10%);
+        border-color: black;
+    }
+    &--lost {
+        background-color: $blackSquareColor;
         border-color: black;
     }
 }

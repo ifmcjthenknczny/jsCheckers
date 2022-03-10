@@ -17,9 +17,7 @@ function pieceHold() {
             this.setAttribute('id', 'piece-clicked');
             if (isThereACapturePossibility()) generateLegalMovesMark(legalCapturesOfPiece(this));
             else generateLegalMovesMark(legalNormalMovesOfPiece(this));
-        } else {
-            highlightPiecesThatCanMove(this);
-        }
+        } else highlightPiecesThatCanMove();
     }
 }
 
@@ -30,16 +28,13 @@ function pieceUnhold() {
     }
 }
 
-function highlightPiecesThatCanMove(clickedPiece) {
-    const isPieceWhite = clickedPiece.classList.contains('piece--white');
-    const selector = isPieceWhite ? '.piece--white' : '.piece--black';
-    const allColorPieces = document.querySelectorAll(selector);
-
-    for (let piece of allColorPieces)
-        if ((legalNormalMovesOfPiece(piece).length > 0 && !isThereACapturePossibility()) || (isThereACapturePossibility() && legalCapturesOfPiece(piece).length > 0)) {
-            piece.classList.add('piece--can-move');
-            if (piece.firstChild) piece.firstChild.classList.add('piece--can-move');
-        }
+function highlightPiecesThatCanMove() {
+    const squaresOfPiecesThanCanMove = Object.keys(findAllLegalMoves(playWhite));
+    for (let squareId of squaresOfPiecesThanCanMove) {
+        const piece = document.querySelector(`#${squareId}`).firstChild;
+        piece.classList.add('piece--can-move');
+        if (piece.firstChild) piece.firstChild.classList.add('piece--can-move');
+    }
 }
 
 function unhighlightPiecesThatCanMove() {
@@ -93,7 +88,7 @@ async function computerMove() {
     let pieceToMove, targetSquare;
 
     if (!chainedCapturePiece) {
-        const [nameOfSquareOfPieceToMove, nameOfTargetSquare] = pickAMove(findAllLegalMoves());
+        const [nameOfSquareOfPieceToMove, nameOfTargetSquare] = pickAMove(findAllLegalMoves(!playWhite));
         pieceToMove = document.querySelector(`#${nameOfSquareOfPieceToMove}`).firstElementChild;
         targetSquare = document.querySelector(`#${nameOfTargetSquare}`);
     } else {
@@ -195,11 +190,9 @@ async function movePiece(startSquare, targetSquare, transitionTimeMs) {
             dummyPiece.remove();
         }
     }
-
-    pieceToMove.style.width = size + 'px';
-    pieceToMove.style.height = size + 'px';
+    pieceToMove.style.width = `${size}px`;
+    pieceToMove.style.height = pieceToMove.style.width;
     pieceToMove.style.position = 'fixed';
-
     pieceToMove.style.transition = `transform ${transitionTimeMs}ms`;
     pieceToMove.style.transform = `translate(${transX}px, ${transY}px)`;
 
@@ -216,18 +209,18 @@ async function movePiece(startSquare, targetSquare, transitionTimeMs) {
 
 
 // move rules-related functions
-function findAllLegalMoves() {
-    const selector = playWhite ? ".piece--black" : ".piece--white";
-    const allComputerPieces = [...document.querySelectorAll(selector)];
+function findAllLegalMoves(forWhite) {
+    const selector = forWhite ? ".piece--white" : ".piece--black";
+    const allColorPieces = [...document.querySelectorAll(selector)];
     const legalMoves = {};
 
     if (isThereACapturePossibility()) {
-        for (let piece of allComputerPieces) {
+        for (let piece of allColorPieces) {
             const legalMovesList = legalCapturesOfPiece(piece);
             if (legalMovesList.length > 0) legalMoves[piece.parentElement.id] = legalMovesList;
         }
     } else {
-        for (let piece of allComputerPieces) {
+        for (let piece of allColorPieces) {
             const legalMovesList = legalNormalMovesOfPiece(piece);
             if (legalMovesList.length > 0) legalMoves[piece.parentElement.id] = legalMovesList;
         }
@@ -285,7 +278,6 @@ function isThereACapturePossibility() {
 function legalCapturesOfPiece(piece) {
     const startingSquare = piece.parentElement;
     let [startingCol, startingRow] = startingSquare.id;
-
     const isWhite = piece.classList.contains('piece--white') ? true : false;
     const classOfPiece = isWhite ? 'piece--white' : 'piece--black';
     const classToCapture = isWhite ? 'piece--black' : 'piece--white';
@@ -319,12 +311,10 @@ function legalCapturesOfPiece(piece) {
                     else if (square.firstChild.classList.contains(classToCapture)) thereIsPieceToCapture = true;
                     else if (square.firstChild.classList.contains(classOfPiece)) break;
                 } else if (!isSquareTaken && thereIsPieceToCapture) possibleSquares.push(square);
-
                 if (!isQueen) {
                     normalPieceIterator++;
                     if (normalPieceIterator === 2) break;
                 }
-
                 colIndex += deltaCol;
                 rowIndex += deltaRow;
             }
@@ -396,17 +386,28 @@ function congratsToWinner() {
     else if (whiteMove) whoToMove.innerHTML = '<span>Black</span> won!';
     else whoToMove.innerHTML = '<span class="white">White</span> won!';
 
-    const allPieces = [...document.querySelectorAll('.piece')];
-    for (piece of allPieces) {
+    const winnerSelector = whiteMove ? '.piece--black' : '.piece--white';
+    const winnerPieces = [...document.querySelectorAll(winnerSelector)];
+    const loserSelector = !whiteMove ? '.piece--black' : '.piece--white';
+    const loserPieces = [...document.querySelectorAll(loserSelector)];
+    for (let piece of winnerPieces) {
         piece.classList.remove('piece-hover');
         piece.classList.add('piece--won');
     }
-    const allQueenDecorations = [...document.querySelectorAll('.piece--queen-decoration')];
-    if (allQueenDecorations.length > 0) {
-        for (let crown of allQueenDecorations) {
-            crown.classList.remove('piece--queen-decoration');
-            crown.classList.add('piece--queen-decoration-won');
-        }
+    for (let piece of loserPieces) {
+        piece.classList.remove('piece-hover');
+        piece.classList.add('piece--lost');
+    }
+    const winnerQueens = winnerPieces.filter(piece => piece.classList.contains('piece--queen'));
+    for (let queen of winnerQueens) {
+        const crown = queen.firstChild;
+        crown.classList.remove('piece--queen-decoration');
+        crown.classList.add('piece--queen-decoration-won');
+    }
+    const loserQueenDecorations = loserPieces.filter(piece => piece.classList.contains('piece--queen'));
+    for (let crown of loserQueenDecorations) {
+        crown.classList.remove('piece--queen-decoration');
+        crown.classList.add('piece--queen-decoration-lost');
     }
 }
 
@@ -420,14 +421,7 @@ function endOfGame() {
 }
 
 function checkIfThereArePossibleMoves() {
-    const selector = whiteMove ? ".piece--white" : ".piece--black";
-    const allColorPieces = [...document.querySelectorAll(selector)];
-    const legalNormalMoves = allColorPieces.map(p => legalNormalMovesOfPiece(p).length);
-    const legalCaptures = allColorPieces.map(p => legalCapturesOfPiece(p).length);
-    const legalMoves = legalNormalMoves.concat(legalCaptures);
-    const sumOfLegalMoves = legalMoves.reduce((total, curr) => total + curr);
-    if (sumOfLegalMoves === 0) return false
-    return true
+    return Object.keys(findAllLegalMoves(whiteMove)).length > 0;
 }
 
 
@@ -498,7 +492,6 @@ function generateStartingPosition() {
             piece.classList.add(order[1]);
             piece.addEventListener('click', pieceHold);
             piece.classList.add('piece-hover');
-
         }
         if (i < 3 * 4 || i >= 5 * 4) blackSquares[i].append(piece);
     }
@@ -514,12 +507,7 @@ function generateButtons() {
     resetButton.addEventListener("click", () => {
         document.body.innerHTML = '';
         document.body.appendChild(document.createElement('main'));
-        whiteMove = true;
-        turn = 1;
-        forcedCapture = false;
-        onlyQueenMovesWithoutCapture = 0;
-        chainedCapturePiece = null;
-        queenCaptureForbiddenDirection = [null, null];
+        resetGlobalVariables();
         generateFirstQuestion();
     });
 
@@ -531,6 +519,16 @@ function generateButtons() {
     buttonContainer.appendChild(resetButton);
     buttonContainer.appendChild(flipButton);
     document.body.appendChild(buttonContainer);
+}
+
+function resetGlobalVariables() {
+    whiteMove = true;
+    turn = 1;
+    forcedCapture = false;
+    onlyQueenMovesWithoutCapture = 0;
+    chainedCapturePiece = null;
+    queenCaptureForbiddenDirection = [null, null];
+    flipBoardBlock = false;
 }
 
 function generateGraveyards() {
@@ -653,7 +651,6 @@ function flipBoard() {
             newBoard[i].appendChild(boardState[i]);
         }
     }
-
     const graveyardTopState = [...document.querySelector('.captured-pieces--top').cloneNode(true).children];
     const graveyardBottomState = [...document.querySelector('.captured-pieces--bottom').cloneNode(true).children];
     for (let minipiece of document.querySelectorAll('.mini-piece')) minipiece.remove();
@@ -664,12 +661,12 @@ function flipBoard() {
 }
 
 async function startGame() {
+    fadeIn('body', 200);
     generateGraveyards();
     generateBoard();
     generateButtons();
     generateGameInfo();
     generateStartingPosition();
-    fadeIn('body', 200);
     if (!playWhite) {
         await sleep(1000);
         computerMove();
