@@ -1,5 +1,4 @@
 .container {
-  margin-top: 25vh;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -41,11 +40,17 @@
   font-family: "Cousine", monospace;
   -webkit-transition: 0.3s;
   transition: 0.3s;
+  color: #222222;
 }
 
 .question--hover-white {
-  -webkit-text-stroke: 1.5px black;
   color: white;
+  -webkit-text-stroke: 1.5px black;
+}
+
+.question--hover-black {
+  color: black;
+  -webkit-text-stroke: 1.5px black;
 }
 
 .button-container--question {
@@ -65,7 +70,6 @@
 @media (max-width: 700px) {
   .container {
     width: 81vw;
-    margin-top: 30vh;
   }
   .question {
     font-size: 3rem;
@@ -274,7 +278,6 @@
 @media (max-width: 700px) {
   .game-info {
     width: 90vw;
-    margin-top: 15vh;
     font-size: 1.4rem;
   }
   .game-info__who-to-move {
@@ -302,6 +305,8 @@ body {
       -ms-flex-flow: column;
           flex-flow: column;
   background-image: url(../img/what-the-hex.png);
+  min-height: 100vh;
+  overflow: hidden;
 }
 
 @media (max-width: 700px) {

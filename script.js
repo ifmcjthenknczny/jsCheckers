@@ -508,7 +508,7 @@ function generateButtons() {
         document.body.innerHTML = '';
         document.body.appendChild(document.createElement('main'));
         resetGlobalVariables();
-        generateFirstQuestion();
+        generateChoiceWindow();
     });
 
     const flipButton = document.createElement('button');
@@ -571,13 +571,12 @@ async function generateTitleWindow() {
     main.appendChild(container);
     document.body.appendChild(main);
     fadeIn('.container', 300);
-
     await sleep(3500);
     container.remove();
-    generateFirstQuestion();
+    generateChoiceWindow();
 }
 
-function generateFirstQuestion() {
+function generateChoiceWindow() {
     const main = document.querySelector('main');
     const container = document.createElement("div");
     container.classList.add('container');
@@ -598,28 +597,22 @@ function generateFirstQuestion() {
         main.innerHTML = '';
         startGame();
     })
-
     buttonBlack.addEventListener('click', () => {
         playWhite = false;
         whitesOnBottom = false;
         main.innerHTML = '';
         startGame();
     })
-
     for (let event of ['mouseover', 'mouseout', 'activate', 'deactivate']) {
         buttonWhite.addEventListener(event, () => {
             const question = document.querySelector('.question');
             question.classList.toggle('question--hover-white');
         })
+        buttonBlack.addEventListener(event, () => {
+            const question = document.querySelector('.question');
+            question.classList.toggle('question--hover-black');
+        })
     }
-
-    // for (let event of ['mouseover', 'mouseout']) {
-    //     buttonBlack.addEventListener(event, () => {
-    //         const question = document.querySelector('.question');
-    //         question.classList.toggle('question--hover-black');
-    //     })
-    // }
-
     container.innerHTML = '';
     container.appendChild(question);
     buttons.appendChild(buttonWhite);
