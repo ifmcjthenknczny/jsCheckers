@@ -67,6 +67,10 @@
   font-family: "Cousine", monospace;
 }
 
+.board--question {
+  width: 20%;
+}
+
 @media (max-width: 700px) {
   .container {
     width: 81vw;
@@ -79,10 +83,6 @@
 .board {
   display: -ms-grid;
   display: grid;
-  -ms-grid-columns: 0.2fr (1fr)[8];
-      grid-template-columns: 0.2fr repeat(8, 1fr);
-  -ms-grid-rows: (1fr)[8] 0.2fr;
-      grid-template-rows: repeat(8, 1fr) 0.2fr;
   grid-auto-flow: row;
   width: 80vh;
   height: 80vh;
@@ -443,7 +443,7 @@ body {
   width: 44.44444%;
   height: 44.44444%;
   border: 1.5px solid;
-  background-color: rgba(145, 145, 145, 0.7);
+  background-color: rgba(119, 119, 119, 0.7);
 }
 
 .piece--won {
@@ -452,7 +452,7 @@ body {
 }
 
 .piece--lost {
-  background-color: rgba(170, 170, 170, 0.7);
+  background-color: rgba(145, 145, 145, 0.7);
   border-color: black;
 }
 

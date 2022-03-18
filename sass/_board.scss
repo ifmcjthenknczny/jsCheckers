@@ -1,7 +1,7 @@
 .board {
     display: grid;
-    grid-template-columns: 0.2fr repeat(8, 1fr);
-    grid-template-rows: repeat(8, 1fr) 0.2fr;
+    // grid-template-columns: 0.2fr repeat(8, 1fr);
+    // grid-template-rows: repeat(8, 1fr) 0.2fr;
     grid-auto-flow: row;
     width: $boardSizeHorizontal;
     height: $boardSizeHorizontal;

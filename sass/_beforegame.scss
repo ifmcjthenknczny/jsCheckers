@@ -50,6 +50,10 @@
     font-family: $secondaryFont;
 }
 
+.board--question {
+    width: 20%;
+}
+
 @media (max-width: 700px) {
     .container {
         width: 0.9 * $boardSizeVertical;

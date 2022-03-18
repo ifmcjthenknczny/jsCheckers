@@ -33,6 +33,8 @@ No setup needed. Just make sure you don't use Internet Explorer. For Android, Go
 
 ## Features
 * All rules of checkers implemented.
+* Ready for different board sizes.
+* Cheats: AEZAKMI, NUTTERTOOLS, ASPIRINE.
 
 * Capture obligation (but not necessarily best one).
 * Possibility of choosing piece color.
@@ -50,11 +52,11 @@ No setup needed. Just make sure you don't use Internet Explorer. For Android, Go
 
 To-do list:
 * Responsiveness improvement: justifying and aligning.
-* Code readibility and quality improvement.
+* Code readibility and code quality improvement.
 * SEO
-* Button "Show legal moves"
+* Implementing visual board size choose window.
 * Computer AI slight improvment (concerning queen moves and best captures)
-* Small bug fix (after flipping the board, pieces sometimes don't move on the first click)
+* Sudden death cheat
 ## Status
 Project is: _in progress_
 

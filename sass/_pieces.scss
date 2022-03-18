@@ -62,7 +62,7 @@
             width: $pieceSize / 1.5;
             height: $pieceSize / 1.5;
             border: 1.5px solid;
-            background-color: darken($blackSquareColor, 10%);
+            background-color: darken($blackSquareColor, 20%);
         }
     }
 
@@ -72,7 +72,7 @@
     }
 
     &--lost {
-        background-color: $blackSquareColor;
+        background-color: darken($blackSquareColor,10%);
         border-color: black;
     }
 }
