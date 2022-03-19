@@ -430,7 +430,7 @@ function removeRandomComputerPiece() {
     const selector = !playWhite ? '.piece--white' : '.piece--black';
     const pieces = document.querySelectorAll(selector);
     pieces[Math.floor(Math.random() * pieces.length)].remove();
-    if (pieces.length === 1) congratsToWinner();
+    if (endOfGame()) congratsToWinner();
 }
 
 function addPlayerPieceRandomly() {
@@ -445,15 +445,16 @@ function addPlayerPieceRandomly() {
     piece.classList.add('piece', 'piece-hover', playWhite ? 'piece--white' : 'piece--black');
     piece.addEventListener('click', pieceHold);
     squareToAddPieceOn.append(piece)
+    if (endOfGame()) congratsToWinner();
 }
 
 // end game
 function congratsToWinner() {
-    // selects top left corener game info, sets variable of winner to null (draw), then determines who wins by if it has any moves or any pieces left
+    // selects top left corner game info, sets variable of winner to null (draw), then determines who wins by if it has any moves or any pieces left
     const whoToMove = document.querySelector(".game-info__who-to-move");
     let winnerWhite = null;
-    if (!document.querySelector('.piece--black') || (!!document.querySelector('.piece--black') && Object.keys(findAllLegalMoves(false)).length === 0)) winnerWhite = true;
-    else if (!document.querySelector('.piece--white') || (!!document.querySelector('.piece--white') && Object.keys(findAllLegalMoves(true)).length === 0)) winnerWhite = false;
+    if (!document.querySelector('.piece--black') || (!!document.querySelector('.piece--black') && Object.keys(findAllLegalMoves(false)).length === 0 && !whiteMove)) winnerWhite = true;
+    else if (!document.querySelector('.piece--white') || (!!document.querySelector('.piece--white') && Object.keys(findAllLegalMoves(true)).length === 0 && whiteMove)) winnerWhite = false;
     else if (onlyQueenMovesWithoutCapture >= 30) whoToMove.innerHTML = 'It is a <span>Draw</span>!';
     /// changes text in top left corner
     if (winnerWhite === false) whoToMove.innerHTML = '<span>Black</span> won!';
@@ -479,10 +480,10 @@ function congratsToWinner() {
         piece.classList.remove('piece-hover');
         piece.classList.add('piece--lost');
     }
-    const loserQueenDecorations = loserPieces.filter(piece => piece.classList.contains('piece--queen'));
-    for (let crown of loserQueenDecorations) {
-        crown.classList.remove('piece--queen-decoration');
-        crown.classList.add('piece--queen-decoration-lost');
+    const loserQueens = loserPieces.filter(piece => piece.classList.contains('piece--queen'));
+    for (let queen of loserQueens) {
+        queen.firstChild.classList.remove('piece--queen-decoration');
+        queen.firstChild.classList.add('piece--queen-decoration-lost');
     }
 }
 
@@ -756,9 +757,10 @@ function flipBoard() {
 }
 
 function cheatsOn() {
-    // turns on cheats
+    // turns on cheats and tracks string entered by player, resets if key is not char
     document.body.addEventListener('keydown', function(e) {
-        if (e.key === "Enter") cheat = "";
+        if (flipBoardBlock) return;
+        if (e.key.length !== 1) cheat = "";
         else cheat += e.key.toUpperCase();
         if (cheat === "AEZAKMI") {
             queenCheat();
