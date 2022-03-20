@@ -5,6 +5,8 @@
     grid-auto-flow: row;
     width: $boardSizeHorizontal;
     height: $boardSizeHorizontal;
+    // border-top: .8px solid $borderColor;
+    // border-right: .8px solid $borderColor;
 }
 
 .grid__square {
@@ -30,12 +32,14 @@
 
         &-col {
             text-transform: uppercase;
+            // border-top: .8px solid $borderColor;
         }
 
         &-row {
             display: flex;
             align-items: center;
             justify-content: center;
+            // border-right: .8px solid $borderColor;
         }
     }
 }
