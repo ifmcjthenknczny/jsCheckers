@@ -1,14 +1,10 @@
 // simple functions
 function range(size, startAt = 0) {
     //creates array of incrementing numbers or letters in alphabetic order of given size and starting from given number or letter (0 if not stated), works only for numbers and chars
-    if (typeof startAt === "string") {
-        if (startAt.length !== 1) return;
-        else
-            return String.fromCharCode(...range(size, startAt.charCodeAt(0))).split(
-                ""
-            );
-    } else if (typeof startAt === "number")
-        return [...Array(size).keys()].map((i) => i + startAt);
+    if (typeof startAt === "string" && startAt.length === 1) return String.fromCharCode(...range(size, startAt.charCodeAt(0))).split(
+        ""
+    );
+    else if (typeof startAt === "number") return [...Array(size).keys()].map((i) => i + startAt);
     else return;
 }
 
@@ -71,9 +67,9 @@ function unhighlightPiecesThatCanMove() {
         piece.classList.remove("piece--can-move");
 }
 
-function generateLegalMovesMark(legalMovesList) {
-    // select all squares of this array and to each append div child with class legal-move
-    for (let legalMoveSquare of legalMovesList) {
+function generateLegalMovesMark(legalMovesSquares) {
+    // select all squares of parameter array and to each append div-child with class legal-move
+    for (let legalMoveSquare of legalMovesSquares) {
         const legalMoveMark = document.createElement("div");
         legalMoveMark.classList.add("legal-move");
         legalMoveSquare.appendChild(legalMoveMark);
@@ -105,7 +101,7 @@ async function makeAMove() {
     setQueenVariables(clickedPiece, this);
     if (forcedCapture)
         removeCapturedPiece(
-            findSquareOfAPieceToCapture(clickedPiece.parentElement.id, this.id)
+            findSquareOfAPieceToCapture(clickedPiece.parentElement, this)
         );
     removeLegalMovesMark();
     movePiece(clickedPiece.parentElement, this, moveAnimationDurationMs);
@@ -125,13 +121,9 @@ async function computerMove() {
     // declares variables which values are about to be determined. if it is not between multiple, chained captures - pick a piece and move from all computer pieces, else randomly pick a capture of only this piece which is inbetween captures
     let pieceToMove, targetSquare;
     if (!chainedCapturePiece) {
-        const [nameOfSquareOfPieceToMove, nameOfTargetSquare] = pickAMove(
+        [pieceToMove, targetSquare] = pickAMove(
             findAllLegalMoves(!playWhite)
         );
-        pieceToMove = document.querySelector(
-            `#${nameOfSquareOfPieceToMove}`
-        ).firstElementChild;
-        targetSquare = document.querySelector(`#${nameOfTargetSquare}`);
     } else {
         pieceToMove = chainedCapturePiece;
         const legalCaptures = legalCapturesOfPiece(pieceToMove);
@@ -142,7 +134,7 @@ async function computerMove() {
     setQueenVariables(pieceToMove, targetSquare);
     if (forcedCapture)
         removeCapturedPiece(
-            findSquareOfAPieceToCapture(pieceToMove.parentElement.id, targetSquare.id)
+            findSquareOfAPieceToCapture(pieceToMove.parentElement, targetSquare)
         );
     movePiece(pieceToMove.parentElement, targetSquare, moveAnimationDurationMs);
     await sleep(moveAnimationDurationMs);
@@ -166,8 +158,8 @@ function setQueenVariables(pieceToMove, targetSquare) {
     queenCaptureForbiddenDirection =
         isQueen && forcedCapture ?
         findQueenCaptureForbiddenDirection(
-            pieceToMove.parentElement.id,
-            targetSquare.id
+            pieceToMove.parentElement,
+            targetSquare
         ) : [null, null];
 }
 
@@ -221,13 +213,13 @@ async function movePiece(startSquare, targetSquare, transitionTimeMs) {
     flipBoardBlock = true;
     // selects piece, squares id and starting and target indexes
     const pieceToMove = startSquare.firstChild;
-    const [startCol, ...startRow] = startSquare.id;
-    const [targetCol, ...targetRow] = targetSquare.id;
+    const [startCol, startRow] = getSquareColAndRow(startSquare);
+    const [targetCol, targetRow] = getSquareColAndRow(targetSquare);
     const [startColIndex, targetColIndex] = [startCol, targetCol].map((x) =>
         cols.indexOf(x)
     );
     const [startRowIndex, targetRowIndex] = [startRow, targetRow].map(
-        (x) => +x.join("") - 1
+        x => x - 1
     );
     // calculates current square width (with border from two sides), includes positive/negative coefficient because of position of board and calculates transiton in both axis
     const squareWidth = +window
@@ -296,13 +288,11 @@ function findAllLegalMoves(forWhite) {
     return legalMoves;
 }
 
-function findQueenCaptureForbiddenDirection(startSquareName, targetSquareName) {
+function findQueenCaptureForbiddenDirection(startSquare, targetSquare) {
     // returns forbidden direction for queen to capture (she can't come back very next chained capture) in form of true-false array
     // true is for increasing, false for decreasing value of rows/cols
-    let [startCol, ...startRow] = startSquareName;
-    let [targetCol, ...targetRow] = targetSquareName;
-    startRow = +startRow.join("");
-    targetRow = +targetRow.join("");
+    let [startCol, startRow] = getSquareColAndRow(startSquare);
+    let [targetCol, targetRow] = getSquareColAndRow(targetSquare);
     return [targetCol < startCol, targetRow < startRow];
 }
 
@@ -339,12 +329,11 @@ function promotion(piece) {
     // checks if piece is already a queen (if yes, return false) and its color and grabs its square row
     if (piece.classList.contains("piece--queen")) return false;
     const isWhite = piece.classList.contains("piece--white") ? true : false;
-    let [, ...clickedPieceRow] = piece.parentElement.id;
-    clickedPieceRow = +clickedPieceRow.join("");
+    let [, clickedPieceRow] = getSquareColAndRow(piece.parentElement);
     // checks if row number of piece's square is last for white or first for black - if yes, returns true, else returns false
     if (
-        (isWhite && +clickedPieceRow === rows[rows.length - 1]) ||
-        (!isWhite && +clickedPieceRow === rows[0])
+        (isWhite && clickedPieceRow === rows[rows.length - 1]) ||
+        (!isWhite && clickedPieceRow === rows[0])
     )
         return true;
     return false;
@@ -366,10 +355,8 @@ function isThereACapturePossibility() {
 
 function legalCapturesOfPiece(piece) {
     // gets id of piece's square, color, color it can capture and if it is a queen, change row in case of it is 2-digits
-    const startingSquare = piece.parentElement;
-    let [startingCol, ...startingRow] = startingSquare.id;
-    startingRow = +startingRow.join("");
-    const startingIndex = rows.indexOf(+startingRow);
+    let [startCol, startRow] = getSquareColAndRow(piece.parentElement);
+    const startIndex = rows.indexOf(startRow);
     const isWhite = piece.classList.contains("piece--white") ? true : false;
     const classOfPiece = isWhite ? "piece--white" : "piece--black";
     const classToCapture = isWhite ? "piece--black" : "piece--white";
@@ -390,8 +377,8 @@ function legalCapturesOfPiece(piece) {
             const deltaCol = colsIncrease ? 1 : -1;
             const deltaRow = rowsIncrease ? 1 : -1;
             // starts not on the square on which given piece is, but one square in diagonal away
-            let colIndex = cols.indexOf(startingCol) + deltaCol;
-            let rowIndex = rows.indexOf(+startingRow) + deltaRow;
+            let colIndex = cols.indexOf(startCol) + deltaCol;
+            let rowIndex = startIndex + deltaRow;
             // initializes variable that changes to true if it founds piece of color to capture
             let thereIsPieceToCapture = false;
             while (
@@ -416,7 +403,7 @@ function legalCapturesOfPiece(piece) {
                 colIndex += deltaCol;
                 rowIndex += deltaRow;
                 // breaks the loops if it is normal piece and its capture movement range has been reached
-                if (!isQueen && Math.abs(rowIndex - startingIndex) > 2) break;
+                if (!isQueen && Math.abs(rowIndex - startIndex) > 2) break;
             }
         }
     }
@@ -425,9 +412,7 @@ function legalCapturesOfPiece(piece) {
 
 function legalNormalMovesOfPiece(piece) {
     // gets id of piece's square, color and whether it is a queen
-    const startingSquare = piece.parentElement;
-    let [startingCol, ...startingRow] = startingSquare.id;
-    startingRow = +startingRow.join("");
+    let [startCol, startRow] = getSquareColAndRow(piece.parentElement);
     const isQueen = piece.classList.contains("piece--queen") ? true : false;
     const isWhite = piece.classList.contains("piece--white") ? true : false;
     // normal move directions depend on the color of piece and if it is queen - true is case of increasing, false is decreasing
@@ -442,8 +427,8 @@ function legalNormalMovesOfPiece(piece) {
             const rowBoundary = rowsIncrease ? rows.length - 1 : 0;
             const deltaCol = colsIncrease ? 1 : -1;
             const deltaRow = rowsIncrease ? 1 : -1;
-            let rowIndex = rows.indexOf(+startingRow) + deltaRow;
-            let colIndex = cols.indexOf(startingCol) + deltaCol;
+            let rowIndex = rows.indexOf(startRow) + deltaRow;
+            let colIndex = cols.indexOf(startCol) + deltaCol;
             while (
                 rowIndex !== rowBoundary + deltaRow &&
                 colIndex !== colBoundary + deltaCol
@@ -473,13 +458,11 @@ function createDiagonalIterable(startIndex, targetIndex) {
 
 function findSquareOfAPieceToCapture(startSquare, targetSquare) {
     // loops over diagonal to find piece to remove
-    let [startCol, ...startRow] = startSquare;
-    let [targetCol, ...targetRow] = targetSquare;
-    startRow = +startRow.join("");
-    targetRow = +targetRow.join("");
+    let [startCol, startRow] = getSquareColAndRow(startSquare);
+    let [targetCol, targetRow] = getSquareColAndRow(targetSquare);
     const rowIterable = createDiagonalIterable(
-        rows.indexOf(+startRow),
-        rows.indexOf(+targetRow)
+        rows.indexOf(startRow),
+        rows.indexOf(targetRow)
     );
     const colIterable = createDiagonalIterable(
         cols.indexOf(startCol),
@@ -499,6 +482,12 @@ function findSquareOfAPieceToCapture(startSquare, targetSquare) {
             return square;
         i++;
     }
+}
+
+function getSquareColAndRow(square) {
+    let [col, ...row] = square.id;
+    row = +row.join("");
+    return [col, row];
 }
 
 // cheats
@@ -556,10 +545,21 @@ function addPlayerPieceRandomly() {
     if (endOfGame()) congratsToWinner();
 }
 
+function leavesOnePlayerPiece() {
+    // selects all player pieces on the board, 
+    removeLegalMovesMark();
+    unhighlightPiecesThatCanMove();
+    pieceUnhold();
+    const selector = playWhite ? '.piece--white' : '.piece--black';
+    const playerPieces = [...document.querySelectorAll(selector)];
+    playerPieces.splice(Math.floor(Math.random() * playerPieces.length), 1);
+    for (let piece of playerPieces) piece.remove();
+    if (endOfGame()) congratsToWinner();
+}
+
 // end game
-function congratsToWinner() {
-    // selects top left corner game info, sets variable of winner to null (draw), then determines who wins by if it has any moves or any pieces left
-    const whoToMove = document.querySelector(".game-info__who-to-move");
+function determineWinner() {
+    // determines who wins by if it has any moves or any pieces left, else it is draw - null
     let winnerWhite = null;
     if (
         !document.querySelector(".piece--black") ||
@@ -575,43 +575,46 @@ function congratsToWinner() {
             whiteMove)
     )
         winnerWhite = false;
-    else if (onlyQueenMovesWithoutCapture >= 30)
-        whoToMove.innerHTML = "It is a <span>Draw</span>!";
-    /// changes text in top left corner
-    if (winnerWhite === false) whoToMove.innerHTML = "<span>Black</span> won!";
-    else if (winnerWhite)
-        whoToMove.innerHTML = '<span class="white">White</span> won!';
-    // picks all winner pieces and loser pieces and gives them appropriate classes for them and queens and strips from hover effects
-    const winnerSelector =
-        winnerWhite === false ? ".piece--black" : ".piece--white";
-    const winnerPieces = [...document.querySelectorAll(winnerSelector)];
-    const loserSelector = winnerWhite ? ".piece--black" : ".piece--white";
-    const loserPieces = [...document.querySelectorAll(loserSelector)];
-    for (let piece of winnerPieces) {
+    return winnerWhite;
+}
+
+function setEndOfGameClasses(winnerWhite, forWhite) {
+    // do not change if it is draw or the player for which it is set has no pieces left, set piece selector and class modifier depending and on if it is for winner
+    if (winnerWhite === null) return;
+    const pieceSelector = forWhite ? '.piece--white' : '.piece--black';
+    const resultClassModifier = ((forWhite && winnerWhite) || (!forWhite && !winnerWhite)) ? 'won' : 'lost';
+    const pieces = [...document.querySelectorAll(pieceSelector)];
+    if (pieces.length === 0) return;
+    // picks all player pieces and gives appropriate classes for them and queens and strips from hover effects
+    for (let piece of pieces) {
         piece.classList.remove("piece-hover");
-        piece.classList.add("piece--won");
+        piece.classList.add(`piece--${resultClassModifier}`);
     }
-    const winnerQueens = winnerPieces.filter((piece) =>
+    const queens = pieces.filter((piece) =>
         piece.classList.contains("piece--queen")
     );
-    for (let queen of winnerQueens) {
+    for (let queen of queens) {
         const crown = queen.firstChild;
         crown.classList.remove("piece--queen-decoration");
         crown.classList.add("piece--queen-decoration-won");
     }
-    // if there are no loser pieces left, there is no point in doing the same to them
-    if (loserPieces.length === 0) return;
-    for (let piece of loserPieces) {
-        piece.classList.remove("piece-hover");
-        piece.classList.add("piece--lost");
+}
+
+function congratsToWinner() {
+    // determines the winner, selects top left corner game info and changes text, set classes for pieces left depending on who won
+    const winnerWhite = determineWinner();
+    const whoToMove = document.querySelector(".game-info__who-to-move");
+    switch (winnerWhite) {
+        case true:
+            whoToMove.innerHTML = '<span class="white">White</span> won!';
+            break;
+        case false:
+            whoToMove.innerHTML = "<span>Black</span> won!";
+            break;
+        case null:
+            whoToMove.innerHTML = "It is a <span>Draw</span>!";
     }
-    const loserQueens = loserPieces.filter((piece) =>
-        piece.classList.contains("piece--queen")
-    );
-    for (let queen of loserQueens) {
-        queen.firstChild.classList.remove("piece--queen-decoration");
-        queen.firstChild.classList.add("piece--queen-decoration-lost");
-    }
+    for (let forWhite of [true, false]) setEndOfGameClasses(winnerWhite, forWhite);
 }
 
 function endOfGame() {
@@ -628,15 +631,15 @@ function endOfGame() {
 function pickAMove(legalMovesDict) {
     // gets all pieces that can move from parameter and randomly chooses one
     const piecesThatCanMove = Object.keys(legalMovesDict);
-    const pieceToMove =
-        piecesThatCanMove[Math.floor(Math.random() * piecesThatCanMove.length)];
+    const nameOfSquareOfPieceToMove = piecesThatCanMove[Math.floor(Math.random() * piecesThatCanMove.length)];
+    const pieceToMove = document.querySelector(`#${nameOfSquareOfPieceToMove}`).firstElementChild;
     // gets possible moves of randomly chosen piece, if there is only one chooses that, else randomly chooses one from them
-    const possibleMoves = legalMovesDict[pieceToMove];
-    const targetSquareId =
+    const possibleMoves = legalMovesDict[nameOfSquareOfPieceToMove];
+    const targetSquare =
         possibleMoves.length === 1 ?
-        possibleMoves[0].id :
-        possibleMoves[Math.floor(Math.random() * possibleMoves.length)].id;
-    return [pieceToMove, targetSquareId]; // returns chosen piece and id of target square
+        possibleMoves[0] :
+        possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+    return [pieceToMove, targetSquare]; // returns chosen piece and target square
 }
 
 // generate game components
@@ -870,11 +873,9 @@ function flipBoard() {
     const boardElements = [...document.querySelector(".board").children];
     const boardState = [];
     for (let element of boardElements) {
-        if (element.classList.contains("grid__square")) {
-            if (!!element.firstChild)
-                boardState.push(element.firstChild.cloneNode(true));
-            else boardState.push(false);
-        }
+        if (!element.classList.contains("grid__square")) continue;
+        if (!!element.firstChild) boardState.push(element.firstChild.cloneNode(true));
+        else boardState.push(false);
     }
     // remove whole board from DOM, reverse array to which all elements where pushed, change orientation of board variable and generate board once again, this time upside down
     document.querySelector(".board").remove();
@@ -895,7 +896,12 @@ function flipBoard() {
         boardState[i].addEventListener("click", clickFunction);
         newBoard[i].appendChild(boardState[i]);
     }
-    // we have to also reverse graveyards, so we create two variables with state of top and bottom, remove pieces in graveyard from dom, reverse arrays of state, then add everything upside down
+    // we have to also reverse graveyards
+    flipGraveyards();
+}
+
+function flipGraveyards() {
+    // create two variables with state of top and bottom, remove pieces in graveyard from dom, reverse arrays of state, then add everything upside down
     const graveyardTopState = [
         ...document.querySelector(".captured-pieces--top").cloneNode(true).children,
     ];
@@ -914,24 +920,16 @@ function flipBoard() {
 }
 
 function cheatsOn() {
-    // turns on cheats and tracks string entered by player, resets if key is not char
+    // turns on cheats and tracks string entered by player, resets string if key is not char or it did started 
     document.body.addEventListener("keydown", function(e) {
         if (flipBoardBlock) return;
         if (e.key.length !== 1) cheat = "";
         else cheat += e.key.toUpperCase();
-        if (cheat === "AEZAKMI") {
-            queenCheat();
-            cheat = "";
+        if (cheat in cheatMap) {
+            cheatMap[cheat]();
+            cheat = '';
         }
-        if (cheat == "NUTTERTOOLS") {
-            removeRandomComputerPiece();
-            cheat = "";
-        }
-        if (cheat == "ASPIRINE") {
-            addPlayerPieceRandomly();
-            cheat = "";
-        }
-    });
+    })
 }
 
 async function startGame() {
@@ -952,6 +950,12 @@ async function startGame() {
 // globals
 let boardSize = 8;
 let cheat = "";
+const cheatMap = {
+    "AEZAKMI": queenCheat,
+    "NUTTERTOOLS": removeRandomComputerPiece,
+    "ASPIRINE": addPlayerPieceRandomly,
+    "LEAVEMEALONE": leavesOnePlayerPiece
+};
 const cols = range(boardSize, "a");
 const rows = range(boardSize, 1);
 let turn = 1;
