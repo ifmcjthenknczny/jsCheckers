@@ -1,17 +1,18 @@
-// simple functions
-function range(size, startAt = 0) {
-    //creates array of incrementing numbers or letters in alphabetic order of given size and starting from given number or letter (0 if not stated), works only for numbers and chars
-    if (typeof startAt === "string" && startAt.length === 1) return String.fromCharCode(...range(size, startAt.charCodeAt(0))).split(
-        ""
-    );
-    else if (typeof startAt === "number") return [...Array(size).keys()].map((i) => i + startAt);
-    else return;
-}
-
-function sleep(ms) {
-    // freezes code execution for given time in milliseconds, used in async functions with await keyword
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
+import {
+    range,
+    sleep,
+    fadeIn,
+    getSquareColAndRow
+} from './generalhelpers.js';
+import {
+    highlightPiecesThatCanMove,
+    unhighlightPiecesThatCanMove,
+    generateLegalMovesMark,
+    removeLegalMovesMark
+} from './playerhelpers.js';
+import {
+    pickAMove
+} from './ai.js';
 
 // piece and legal moves service
 function pieceHold() {
@@ -34,7 +35,7 @@ function pieceHold() {
             generateLegalMovesMark(legalCapturesOfPiece(this));
         else generateLegalMovesMark(legalNormalMovesOfPiece(this));
         // if this piece can't move - show which pieces can
-    } else highlightPiecesThatCanMove();
+    } else highlightPiecesThatCanMove(findAllLegalMoves(playWhite));
 }
 
 function pieceUnhold() {
@@ -45,42 +46,6 @@ function pieceUnhold() {
         document.querySelector("#piece-clicked").removeAttribute("id");
     removeLegalMovesMark();
     unhighlightPiecesThatCanMove();
-}
-
-function highlightPiecesThatCanMove() {
-    // select all squares on which are the pieces of given color that can move
-    const squaresOfPiecesThanCanMove = Object.keys(findAllLegalMoves(playWhite));
-    // and give every one of them class piece--can-move
-    for (let squareId of squaresOfPiecesThanCanMove) {
-        const piece = document.querySelector(`#${squareId}`).firstChild;
-        piece.classList.add("piece--can-move");
-        if (!!piece.firstChild) piece.firstChild.classList.add("piece--can-move");
-    }
-}
-
-function unhighlightPiecesThatCanMove() {
-    // select all pieces with class piece--can-move and remove this class
-    const piecesToRemoveClass = [
-        ...document.querySelectorAll(".piece--can-move"),
-    ];
-    for (let piece of piecesToRemoveClass)
-        piece.classList.remove("piece--can-move");
-}
-
-function generateLegalMovesMark(legalMovesSquares) {
-    // select all squares of parameter array and to each append div-child with class legal-move
-    for (let legalMoveSquare of legalMovesSquares) {
-        const legalMoveMark = document.createElement("div");
-        legalMoveMark.classList.add("legal-move");
-        legalMoveSquare.appendChild(legalMoveMark);
-    }
-}
-
-function removeLegalMovesMark() {
-    // select all elements with class legal-move and remove them from DOM
-    const legalMovesMarks = document.querySelectorAll(".legal-move");
-    if (legalMovesMarks.length > 0)
-        for (let mark of legalMovesMarks) mark.remove();
 }
 
 // turns
@@ -194,20 +159,7 @@ function changeGameInfo() {
     } else whoToMove.innerText = "Black";
 }
 
-// animations
-async function fadeIn(elementSelector, time) {
-    // sets element to invisible, and increments its opacity to 1 in steps dictated by deltaOpacity
-    let opacity = 0;
-    const element = document.querySelector(elementSelector);
-    element.style.opacity = opacity;
-    const deltaOpacity = 0.04;
-    while (opacity <= 1) {
-        await sleep(time * deltaOpacity);
-        opacity = opacity + deltaOpacity;
-        element.style.opacity = opacity;
-    }
-}
-
+// move animation
 async function movePiece(startSquare, targetSquare, transitionTimeMs) {
     // block flipping the board, because everything crashes
     flipBoardBlock = true;
@@ -305,11 +257,14 @@ function crownTheQueen(piece) {
 }
 
 function removeCapturedPiece(square) {
-    // checks the color of piece on given square parameter and if it is queen, then removes it
+    // checks the color of piece on given square parameter and if it is queen, then removes it, then adds to the appropriate graveyard 
     const isQueen = square.firstChild.classList.contains("piece--queen");
     const isPieceWhite = square.firstChild.classList.contains("piece--white");
     square.firstChild.remove();
+    addPieceToGraveyard(isPieceWhite, isQueen);
+}
 
+function addPieceToGraveyard(isPieceWhite, isQueen) {
     // creates mini piece with given classes and adds it to appropriate graveyard zone
     const pieceMini = document.createElement("div");
     if (isQueen) pieceMini.classList.add("mini-piece--queen");
@@ -484,12 +439,6 @@ function findSquareOfAPieceToCapture(startSquare, targetSquare) {
     }
 }
 
-function getSquareColAndRow(square) {
-    let [col, ...row] = square.id;
-    row = +row.join("");
-    return [col, row];
-}
-
 // cheats
 function queenCheat() {
     // cheat to make all your pieces queens, possible to turn on only one time
@@ -578,7 +527,7 @@ function determineWinner() {
     return winnerWhite;
 }
 
-function setEndOfGameClasses(winnerWhite, forWhite) {
+function setEndOfGameAppearance(winnerWhite, forWhite) {
     // do not change if it is draw or the player for which it is set has no pieces left, set piece selector and class modifier depending and on if it is for winner
     if (winnerWhite === null) return;
     const pieceSelector = forWhite ? '.piece--white' : '.piece--black';
@@ -614,7 +563,7 @@ function congratsToWinner() {
         case null:
             whoToMove.innerHTML = "It is a <span>Draw</span>!";
     }
-    for (let forWhite of [true, false]) setEndOfGameClasses(winnerWhite, forWhite);
+    for (let forWhite of [true, false]) setEndOfGameAppearance(winnerWhite, forWhite);
 }
 
 function endOfGame() {
@@ -625,21 +574,6 @@ function endOfGame() {
     if (Object.keys(findAllLegalMoves(whiteMove)).length === 0) return true;
     if (onlyQueenMovesWithoutCapture >= 30) return true;
     return false;
-}
-
-// computer AI
-function pickAMove(legalMovesDict) {
-    // gets all pieces that can move from parameter and randomly chooses one
-    const piecesThatCanMove = Object.keys(legalMovesDict);
-    const nameOfSquareOfPieceToMove = piecesThatCanMove[Math.floor(Math.random() * piecesThatCanMove.length)];
-    const pieceToMove = document.querySelector(`#${nameOfSquareOfPieceToMove}`).firstElementChild;
-    // gets possible moves of randomly chosen piece, if there is only one chooses that, else randomly chooses one from them
-    const possibleMoves = legalMovesDict[nameOfSquareOfPieceToMove];
-    const targetSquare =
-        possibleMoves.length === 1 ?
-        possibleMoves[0] :
-        possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
-    return [pieceToMove, targetSquare]; // returns chosen piece and target square
 }
 
 // generate game components
@@ -897,10 +831,10 @@ function flipBoard() {
         newBoard[i].appendChild(boardState[i]);
     }
     // we have to also reverse graveyards
-    flipGraveyards();
+    swapGraveyards();
 }
 
-function flipGraveyards() {
+function swapGraveyards() {
     // create two variables with state of top and bottom, remove pieces in graveyard from dom, reverse arrays of state, then add everything upside down
     const graveyardTopState = [
         ...document.querySelector(".captured-pieces--top").cloneNode(true).children,
@@ -921,7 +855,7 @@ function flipGraveyards() {
 
 function cheatsOn() {
     // turns on cheats and tracks string entered by player, resets string if key is not char or it did started 
-    document.body.addEventListener("keydown", function(e) {
+    document.addEventListener("keydown", function(e) {
         if (flipBoardBlock) return;
         if (e.key.length !== 1) cheat = "";
         else cheat += e.key.toUpperCase();

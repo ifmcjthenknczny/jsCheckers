@@ -56,7 +56,7 @@ To-do list:
 * SEO
 * Implementing visual board size choose window.
 * Computer AI slight improvment (concerning queen moves and best captures)
-* Sudden death cheat
+* Sudden death cheat (1vs1)
 ## Status
 Project is: _in progress_
 

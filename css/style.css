@@ -228,6 +228,10 @@
     height: 40px;
     font-size: 16px;
     border-radius: 8px;
+    color: black;
+  }
+  .button--flip {
+    font-size: 12px;
   }
   .button-container--game {
     width: 90vw;
