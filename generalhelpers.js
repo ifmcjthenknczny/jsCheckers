@@ -33,4 +33,12 @@ function getSquareColAndRow(square) {
     return [col, row];
 }
 
-export {range, sleep, fadeIn, getSquareColAndRow}
+function createDiagonalIterable(startIndex, targetIndex) {
+    // creates range to iterate over for either rows or cols, from the given square in given direction
+    return startIndex < targetIndex ?
+        range(targetIndex - startIndex, startIndex + 1) :
+        range(startIndex - targetIndex, targetIndex).reverse();
+}
+
+export {range, sleep, fadeIn, getSquareColAndRow, createDiagonalIterable}
+

@@ -2,7 +2,8 @@ import {
     range,
     sleep,
     fadeIn,
-    getSquareColAndRow
+    getSquareColAndRow,
+    createDiagonalIterable
 } from './generalhelpers.js';
 import {
     highlightPiecesThatCanMove,
@@ -240,74 +241,6 @@ function findAllLegalMoves(forWhite) {
     return legalMoves;
 }
 
-function findQueenCaptureForbiddenDirection(startSquare, targetSquare) {
-    // returns forbidden direction for queen to capture (she can't come back very next chained capture) in form of true-false array
-    // true is for increasing, false for decreasing value of rows/cols
-    let [startCol, startRow] = getSquareColAndRow(startSquare);
-    let [targetCol, targetRow] = getSquareColAndRow(targetSquare);
-    return [targetCol < startCol, targetRow < startRow];
-}
-
-function crownTheQueen(piece) {
-    // adds class piece--queen for piece parameter and div child with class of piece--queen-decoration
-    piece.classList.add("piece--queen");
-    const queenDecoration = document.createElement("div");
-    queenDecoration.classList.add("piece--queen-decoration");
-    piece.appendChild(queenDecoration);
-}
-
-function removeCapturedPiece(square) {
-    // checks the color of piece on given square parameter and if it is queen, then removes it, then adds to the appropriate graveyard 
-    const isQueen = square.firstChild.classList.contains("piece--queen");
-    const isPieceWhite = square.firstChild.classList.contains("piece--white");
-    square.firstChild.remove();
-    addPieceToGraveyard(isPieceWhite, isQueen);
-}
-
-function addPieceToGraveyard(isPieceWhite, isQueen) {
-    // creates mini piece with given classes and adds it to appropriate graveyard zone
-    const pieceMini = document.createElement("div");
-    if (isQueen) pieceMini.classList.add("mini-piece--queen");
-    else
-        isPieceWhite ?
-        pieceMini.classList.add("mini-piece--white") :
-        pieceMini.classList.add("mini-piece--black");
-    pieceMini.classList.add("mini-piece");
-    const targetGraveyard =
-        (isPieceWhite && whitesOnBottom) || (!isPieceWhite && !whitesOnBottom) ?
-        ".captured-pieces--top" :
-        ".captured-pieces--bottom";
-    document.querySelector(targetGraveyard).appendChild(pieceMini);
-}
-
-function promotion(piece) {
-    // checks if piece is already a queen (if yes, return false) and its color and grabs its square row
-    if (piece.classList.contains("piece--queen")) return false;
-    const isWhite = piece.classList.contains("piece--white") ? true : false;
-    let [, clickedPieceRow] = getSquareColAndRow(piece.parentElement);
-    // checks if row number of piece's square is last for white or first for black - if yes, returns true, else returns false
-    if (
-        (isWhite && clickedPieceRow === rows[rows.length - 1]) ||
-        (!isWhite && clickedPieceRow === rows[0])
-    )
-        return true;
-    return false;
-}
-
-function isThereACapturePossibility() {
-    // selects all pieces that are about to move and checks if any of them can capture another piece, returns true/false
-    const selector = whiteMove ? ".piece--white" : ".piece--black";
-    const allColorPieces = document.querySelectorAll(selector);
-    for (let piece of allColorPieces) {
-        if (legalCapturesOfPiece(piece).length > 0) {
-            forcedCapture = true;
-            return true;
-        }
-    }
-    forcedCapture = false;
-    return false;
-}
-
 function legalCapturesOfPiece(piece) {
     // gets id of piece's square, color, color it can capture and if it is a queen, change row in case of it is 2-digits
     let [startCol, startRow] = getSquareColAndRow(piece.parentElement);
@@ -404,11 +337,20 @@ function legalNormalMovesOfPiece(piece) {
     return possibleSquares;
 }
 
-function createDiagonalIterable(startIndex, targetIndex) {
-    // creates range to iterate over for either rows or cols, from the given square in given direction
-    return startIndex < targetIndex ?
-        range(targetIndex - startIndex, startIndex + 1) :
-        range(startIndex - targetIndex, targetIndex).reverse();
+function findQueenCaptureForbiddenDirection(startSquare, targetSquare) {
+    // returns forbidden direction for queen to capture (she can't come back very next chained capture) in form of true-false array
+    // true is for increasing, false for decreasing value of rows/cols
+    let [startCol, startRow] = getSquareColAndRow(startSquare);
+    let [targetCol, targetRow] = getSquareColAndRow(targetSquare);
+    return [targetCol < startCol, targetRow < startRow];
+}
+
+function crownTheQueen(piece) {
+    // adds class piece--queen for piece parameter and div child with class of piece--queen-decoration
+    piece.classList.add("piece--queen");
+    const queenDecoration = document.createElement("div");
+    queenDecoration.classList.add("piece--queen-decoration");
+    piece.appendChild(queenDecoration);
 }
 
 function findSquareOfAPieceToCapture(startSquare, targetSquare) {
@@ -437,6 +379,58 @@ function findSquareOfAPieceToCapture(startSquare, targetSquare) {
             return square;
         i++;
     }
+}
+
+function removeCapturedPiece(square) {
+    // checks the color of piece on given square parameter and if it is queen, then removes it, then adds to the appropriate graveyard 
+    const isQueen = square.firstChild.classList.contains("piece--queen");
+    const isPieceWhite = square.firstChild.classList.contains("piece--white");
+    square.firstChild.remove();
+    addPieceToGraveyard(isPieceWhite, isQueen);
+}
+
+function addPieceToGraveyard(isPieceWhite, isQueen) {
+    // creates mini piece with given classes and adds it to appropriate graveyard zone
+    const pieceMini = document.createElement("div");
+    if (isQueen) pieceMini.classList.add("mini-piece--queen");
+    else
+        isPieceWhite ?
+        pieceMini.classList.add("mini-piece--white") :
+        pieceMini.classList.add("mini-piece--black");
+    pieceMini.classList.add("mini-piece");
+    const targetGraveyard =
+        (isPieceWhite && whitesOnBottom) || (!isPieceWhite && !whitesOnBottom) ?
+        ".captured-pieces--top" :
+        ".captured-pieces--bottom";
+    document.querySelector(targetGraveyard).appendChild(pieceMini);
+}
+
+function promotion(piece) {
+    // checks if piece is already a queen (if yes, return false) and its color and grabs its square row
+    if (piece.classList.contains("piece--queen")) return false;
+    const isWhite = piece.classList.contains("piece--white") ? true : false;
+    let [, clickedPieceRow] = getSquareColAndRow(piece.parentElement);
+    // checks if row number of piece's square is last for white or first for black - if yes, returns true, else returns false
+    if (
+        (isWhite && clickedPieceRow === rows[rows.length - 1]) ||
+        (!isWhite && clickedPieceRow === rows[0])
+    )
+        return true;
+    return false;
+}
+
+function isThereACapturePossibility() {
+    // selects all pieces that are about to move and checks if any of them can capture another piece, returns true/false
+    const selector = whiteMove ? ".piece--white" : ".piece--black";
+    const allColorPieces = document.querySelectorAll(selector);
+    for (let piece of allColorPieces) {
+        if (legalCapturesOfPiece(piece).length > 0) {
+            forcedCapture = true;
+            return true;
+        }
+    }
+    forcedCapture = false;
+    return false;
 }
 
 // cheats
