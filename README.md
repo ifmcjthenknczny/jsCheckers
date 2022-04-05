@@ -1,5 +1,5 @@
 # jsCheckers
-> Simple responsive webpage, where you can play checkers with computer opponent. Available at https://ifmcjthenknczny.github.io/jsCheckers/.
+> Responsive webpage on which you can play checkers with computer opponent. Available at https://ifmcjthenknczny.github.io/jsCheckers/.
 
 ## Table of contents
 * [General info](#general-info)
